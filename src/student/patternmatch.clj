@@ -62,24 +62,24 @@ w; Created by: Erik Whipp
             (filter (fn [[k v]] (= v 1)))
             (keys)))
 
-(defn tree-traversal
+(defn tree-traversal ; CREDIT: clojure.walk https://github.com/clojure/clojure/blob/master/src/clj/clojure/walk.clj
     "Travserse an arbitrary data structure -- walk"
     [inner outer form]
     (cond
-    (list? form) (outer (apply list (map inner form)))
-   (instance? clojure.lang.IMapEntry form) (outer (vec (map inner form)))
-   (seq? form) (outer (doall (map inner form)))
-   (instance? clojure.lang.IRecord form)
-     (outer (reduce (fn [r x] (conj r (inner x))) form form))
-   (coll? form) (outer (into (empty form) (map inner form)))
+        (list? form) (outer (apply list (map inner form)))
+        (instance? clojure.lang.IMapEntry form) (outer (vec (map inner form)))
+        (seq? form) (outer (doall (map inner form)))
+        (instance? clojure.lang.IRecord form)
+            (outer (reduce (fn [r x] (conj r (inner x))) form form))
+        (coll? form) (outer (into (empty form) (map inner form)))
    :else (outer form)))
 
-(defn depth-first-post-order
+(defn depth-first-post-order ; CREDIT: clojure.postwalk https://github.com/clojure/clojure/blob/master/src/clj/clojure/walk.clj
     "performs a depth first post order traversal"
     [fcn form]
     (tree-traversal (partial depth-first-post-order fcn) fcn form))
 
-(defn transform-recursively
+(defn transform-recursively ; CREDIT: clojure.postwalk-replace https://github.com/clojure/clojure/blob/master/src/clj/clojure/walk.clj
     "Replace but works on any type of data structure"
     [replace-val final-form]
     (depth-first-post-order (fn [x] (if (contains? replace-val x) (replace-val x) x)) final-form))
