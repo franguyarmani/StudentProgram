@@ -134,7 +134,8 @@ w; Created by: Erik Whipp
 (defn single-function-pat-match ; single-matcher
     [pattern input bindings]
     "Call the correct function for a single pattern -- eg is, or etc"
-    (call-arg-on-remaining-args (single)))
+    (call-arg-on-remaining-args (single-function-matcher (first pattern)))
+        (rest pattern) input bindings)
 
 (defn segment-function-matcher ; segment-match-fn
     [var]
