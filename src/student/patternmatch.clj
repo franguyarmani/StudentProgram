@@ -141,11 +141,10 @@ w; Created by: Erik Whipp
     (seq? (first pattern))
     (symbol? (ffirst pattern))))
 
-;
-;(defn match-if
- ;   "Tests for the patter (?if expre) rest of sentence"
-  ;  [pattern input-var bindings]
-   ; (and (binding ()))
+(defn match-if
+    "Tests for the patter (?if expre) rest of sentence"
+    [pattern input-var bindings]
+    (and (binding ())))
 
 ; Singles
 (defn match-is)
