@@ -8,12 +8,12 @@ w; Created by: Erik Whipp
 ; ---- multiply            DONE
 ; ---- questions           DONE
 ; ---- addition            DONE
-; ---- if
+; ---- if                  DONE
 ; -- singles
-; ---- is
-; ---- or
-; ---- and
-; ---- not
+; ---- is                   DONE
+; ---- or                   DONE
+; ---- and                  DONE        
+; ---- not                  DONE
 ; -- helpers
 ; ---- expand-pat-match
 ; ---- abbreviate the table
@@ -144,7 +144,11 @@ w; Created by: Erik Whipp
 (defn match-if
     "Tests for the patter (?if expre) rest of sentence"
     [pattern input-var bindings]
-    (and (binding ())))
+    ([[v pred] pattern 
+        new-bindings (pattern-matcher-main v input-var bindings)]
+        (if (or (= new-binding nil) (not ((resolve pred) input-var)))
+        (println "Failed to find if var")
+        new-bindings)))
 
 ; Singles
 (defn match-is
