@@ -85,14 +85,17 @@ w; Created by: Erik Whipp
 ; Segments
 (defn segment-match ; Need pattern match
     "Match against ?* pattern"
-    [pattern input-var bindings & optionals (start 0)]
+    [pattern input-var bindings &optionals]
     (let [var (second (first pattern))
           in-pattern (rest pattern)]
           (if (nil? in-pattern) (match-with-variable var input-var bindings)
           (let [pos (first-possible-match (first pattern) input-var start)]
             (if (nil? pos) (println "failure to find match")
                 (let [try-again (pattern-matcher-main in-pattern (nthrest input-var pos)
-                      (match-with-variable var (nthrest input )) )] ))))))
+                      (match-with-variable var (rest-between-two-indexes input-var 0 pos) bindings))] 
+                ; Failure handling
+                (if (nil? try-again) (println "Failure, brah try again.") 
+                    (segment-match pattern input bindings (inc pos) try-again))))))))
 
 (defn segment-match-add)
     
