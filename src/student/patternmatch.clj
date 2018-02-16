@@ -131,10 +131,20 @@ w; Created by: Erik Whipp
     (call-arg-on-remaining-args (segment-match-fn (ffirst pattern)))
         pattern input-seg bindings)
 
-(defn single-function-matcher ; segment-match-fn
+(defn single-function-pat-match ; single-matcher
+    [pattern input bindings]
+    "Call the correct function for a single pattern -- eg is, or etc"
+    (call-arg-on-remaining-args (single)))
+
+(defn segment-function-matcher ; segment-match-fn
     [var]
     "When a symbol is input, find the corresponding segment/function for it"
-    (when (symbol? var) (get var segment-match)))
+    (when (symbol? var) (get var :segment-match)))
+
+(defn single-function-matcher ; single-match-fn
+    [x]
+    "Call the right function for a single pattern"
+    (when (symbol? x) (get x :single-match)))
 
 (defn pattern-matcher-main ; pat-match
     ([pattern binded-input & [optional other-bindings]]
