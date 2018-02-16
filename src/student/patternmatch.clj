@@ -54,13 +54,35 @@ w; Created by: Erik Whipp
             (filter (fn [[k v]] (> v 1)))
             (keys)))
 
-(find-non-duplicate-numbers
+(defn find-non-duplicate-numbers
     "Finds duplicate numbers in a list"
     [numbers]
         (->> numbers
             (frequencies)
             (filter (fn [[k v]] (= v 1)))
-            (keys))))
+            (keys)))
+
+(defn tree-traversal
+    "Travserse an arbitrary data structure -- walk"
+    [inner outer form]
+    (cond
+    (list? form) (outer (apply list (map inner form)))
+   (instance? clojure.lang.IMapEntry form) (outer (vec (map inner form)))
+   (seq? form) (outer (doall (map inner form)))
+   (instance? clojure.lang.IRecord form)
+     (outer (reduce (fn [r x] (conj r (inner x))) form form))
+   (coll? form) (outer (into (empty form) (map inner form)))
+   :else (outer form)))
+
+(defn depth-first-post-order
+    "performs a depth first post order traversal"
+    [fcn form]
+    (tree-traversal (partial depth-first-post-order fcn) fcn form))
+
+(defn transform-recursively
+    "Replace but works on any type of data structure"
+    [replace-val final-form]
+    (depth-first-post-order (fn [x] (if (contains? replace-val x) (replace-val x) x)) final-form))
 
 (defn rest-between-two-indexes
     "Return the all values between two indexes
@@ -119,11 +141,11 @@ w; Created by: Erik Whipp
     (seq? (first pattern))
     (symbol? (ffirst pattern))))
 
-
-(defn match-if
-    "Tests for the patter (?if expre) rest of sentence"
-    [pattern input-var bindings]
-    (and ()))
+;
+;(defn match-if
+ ;   "Tests for the patter (?if expre) rest of sentence"
+  ;  [pattern input-var bindings]
+   ; (and (binding ()))
 
 ; Singles
 (defn match-is)
