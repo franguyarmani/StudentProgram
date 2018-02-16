@@ -5,9 +5,9 @@ w; Created by: Erik Whipp
 
 ; FUNCTIONS THAT MUST BE IMPLEMENT
 ; -- segments
-; ---- multiply
-; ---- questions
-; ---- addition
+; ---- multiply            DONE
+; ---- questions           DONE
+; ---- addition            DONE
 ; ---- if
 ; -- singles
 ; ---- is
@@ -83,9 +83,11 @@ w; Created by: Erik Whipp
 ; Binding functions
 ; ==========================================================================
 ; Segments
-(defn segment-match ; Need pattern match
+(defn segment-match 
     "Match against ?* pattern"
-    [pattern input-var bindings &optionals]
+    ([pattern input-var bindings]
+        (segment-match pattern input-var bindings 0))
+    ([pattern input-var bindings start]
     (let [var (second (first pattern))
           in-pattern (rest pattern)]
           (if (nil? in-pattern) (match-with-variable var input-var bindings)
@@ -95,11 +97,20 @@ w; Created by: Erik Whipp
                       (match-with-variable var (rest-between-two-indexes input-var 0 pos) bindings))] 
                 ; Failure handling
                 (if (nil? try-again) (println "Failure, brah try again.") 
-                    (segment-match pattern input bindings (inc pos) try-again))))))))
+                    (segment-match pattern input-var bindings (inc pos))) try-again)))))))
 
-(defn segment-match-add)
-    
-(defn segment-match?)
+(defn segment-match-add
+    "Match one or more elements of input."
+    [pattern input-var bindings]
+    (segment-match pattern input-var bindings 1))
+
+(defn segment-match?
+    "Match zero or one element of input"
+    [pattern input-var bindings]
+    (let [var (second (first pattern))
+          in-pattern (rest pattern)]
+          (or (pattern-matcher-main (cons var in-pattern) input-var bindings)
+              (pattern-matcher-main in-pattern input-var bindings))))
 
 (defn matches-segment-pattern?  ; segment-pattern? 
     "Does this match (?+, ?-) "
@@ -109,7 +120,10 @@ w; Created by: Erik Whipp
     (symbol? (ffirst pattern))))
 
 
-(defn match-if)
+(defn match-if
+    "Tests for the patter (?if expre) rest of sentence"
+    [pattern input-var bindings]
+    (and ()))
 
 ; Singles
 (defn match-is)
