@@ -32,6 +32,7 @@ w; Created by: Erik Whipp
 ; ---- rules-based-translator 
 ; ---- first-position-matcher DONE 
 ;
+(use 'clojure.test)
 
 ; Helper functions to do random shit
 ; ==========================================================================
@@ -62,28 +63,6 @@ w; Created by: Erik Whipp
             (filter (fn [[k v]] (= v 1)))
             (keys)))
 
-(defn tree-traversal ; CREDIT: clojure.walk https://github.com/clojure/clojure/blob/master/src/clj/clojure/walk.clj
-    "Travserse an arbitrary data structure -- walk"
-    [inner outer form]
-    (cond
-        (list? form) (outer (apply list (map inner form)))
-        (instance? clojure.lang.IMapEntry form) (outer (vec (map inner form)))
-        (seq? form) (outer (doall (map inner form)))
-        (instance? clojure.lang.IRecord form)
-            (outer (reduce (fn [r x] (conj r (inner x))) form form))
-        (coll? form) (outer (into (empty form) (map inner form)))
-   :else (outer form)))
-
-(defn depth-first-post-order ; CREDIT: clojure.postwalk https://github.com/clojure/clojure/blob/master/src/clj/clojure/walk.clj
-    "performs a depth first post order traversal"
-    [fcn form]
-    (tree-traversal (partial depth-first-post-order fcn) fcn form))
-
-(defn transform-recursively ; CREDIT: clojure.postwalk-replace https://github.com/clojure/clojure/blob/master/src/clj/clojure/walk.clj
-    "Replace but works on any type of data structure"
-    [replace-val final-form]
-    (depth-first-post-order (fn [x] (if (contains? replace-val x) (replace-val x) x)) final-form))
-
 (defn rest-between-two-indexes
     "Return the all values between two indexes
      Similar to substrings but for lists instead"
@@ -105,6 +84,12 @@ w; Created by: Erik Whipp
 ; Binding functions
 ; ==========================================================================
 ; Segments
+
+(defn segment-match-add
+    "Match one or more elements of input."
+    [pattern input-var bindings]
+    (segment-match pattern input-var bindings 1))
+
 (defn segment-match 
     "Match against ?* pattern"
     ([pattern input-var bindings]
@@ -120,11 +105,6 @@ w; Created by: Erik Whipp
                 ; Failure handling
                 (if (nil? try-again) (println "Failure, brah try again.") 
                     (segment-match pattern input-var bindings (inc pos))) try-again)))))))
-
-(defn segment-match-add
-    "Match one or more elements of input."
-    [pattern input-var bindings]
-    (segment-match pattern input-var bindings 1))
 
 (defn segment-match?
     "Match zero or one element of input"
@@ -209,12 +189,18 @@ w; Created by: Erik Whipp
                     (empty? column) nil
                     (test (first column)) current-position
                     :else (recur test (rest column) start (inc current-position)))))
+
+;  Translators
+; ==========================================================================
+(defn rules-based-translator
+    [input rules &key ])
+
 ; Pattern matcher 
 ; ==========================================================================
 (defn is-variable ; variable-p
     [x]
     "Is x a variable that begins with ?"
-    (and (symbol? x) (= \? (first (name x)))))
+    (and (symbol? x) (= \? (get (str x) 0))))
 
 (defn segment-pattern ; segment-pattern-p
     [pattern]
