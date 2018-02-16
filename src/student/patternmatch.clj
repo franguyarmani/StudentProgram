@@ -54,8 +54,6 @@ w; Created by: Erik Whipp
             (filter (fn [[k v]] (> v 1)))
             (keys)))
 
-(find-duplicate-numbers (concat '(1 2 3 4 5) '(1 2 3)))
-
 (find-non-duplicate-numbers
     "Finds duplicate numbers in a list"
     [numbers]
@@ -76,7 +74,6 @@ w; Created by: Erik Whipp
            (drop (- endnew startnew) rev-x)
            (take (- endnew startnew) (find-duplicate-numbers (concat reg-x rev-x)))))
 
-           (rest-between-two-indexes '(1 2 3 4 5) 1 4)
 ; Table of available bindings
 ; ==========================================================================
 (def binding-table
