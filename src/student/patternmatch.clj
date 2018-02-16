@@ -167,7 +167,12 @@ w; Created by: Erik Whipp
             (match-or (rest pattern) input-var bindings) new-binding))))
 
 (defn match-and
-    )
+    "Succeed if all patterns match the input"
+    [pattern input-var bindings]
+    (cond
+        (nil? bindings) (println "All inputs do not match the given patterns")
+    :else
+        (true? (match-and (rest pattern) input-var (pattern-matcher-main (first pattern) input-var bindings)))))
 
 (defn match-not)
 
