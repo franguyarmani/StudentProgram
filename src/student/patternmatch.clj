@@ -1,4 +1,4 @@
-; Created by: Erik Whipp 
+w; Created by: Erik Whipp 
 ; &copy; 2018
 ; Ain't got no license, doe muhfucka
 
@@ -50,9 +50,9 @@
     (let [var (second (first pattern))
           in-pattern (rest pattern)]
           (if (nil? in-pattern) (match-with-variable var input-var bindings)
-          (let [position (first-possible-match (first pattern) input-var start)]
-            (if (nil? position) (println "failure to find match")
-                (let []))))))
+          (let [pos (first-possible-match (first pattern) input-var start)]
+            (if (nil? pos) (println "failure to find match")
+                (let [try-again (pat-match)] ))))))
 
 (defn segment-match-add)
     
@@ -112,12 +112,13 @@
      eg: (call-arg-on-remaining-args #'* 2 2 2) OUTPUT: 8"
      (apply arg remaining-args)) ; apply doesn't work because it needs to end with a list
 
+
 (defn segment-pattern ; segment-pattern-p
     [pattern]
     "Does this match ?* var :pattern"
     (and (reject-empty-list pattern) (reject-empty-list (first pattern))
     (symbol? (first (first pattern)))
-    (match-segment-function (first (first pattern)))))
+    (single-function-matcher (first (first pattern)))))
 
 (defn is-a-singular-pattern ; single-pattern-p
     [pattern]
@@ -126,7 +127,9 @@
 
 (defn segment-matcher ; segment-matcher
     [pattern input-seg bindings]
-    (call-arg-on-remaining-args ))
+    "Calls the correct function that corresponds to the input pattern"
+    (call-arg-on-remaining-args (segment-match-fn (ffirst pattern)))
+        pattern input-seg bindings)
 
 (defn single-function-matcher ; segment-match-fn
     [var]
@@ -134,15 +137,13 @@
     (when (symbol? var) (get var segment-match)))
 
 (defn pattern-matcher-main ; pat-match
-    ([pattern binded-input]
+    ([pattern binded-input & [optional other-bindings]]
     "match the patterns with input through a binding"
-    (pattern-matcher-main pattern binded-input no-binding))
-    ([pattern binded-input other-bindings]
-        (cond
-            (nil? other-bindings) (println "fail") ; if end binding is nil --> we failed
-            (var? pattern) (match-with-variable pattern binded-input other-bindings) ; if pattern is a variable --> match with a var
-            (= pattern binded-input) other-bindings ; if pattern is equal to the input --> match to the other binding
-                ))
+    (cond
+        (= binded-input false) (println "failure to find a match")
+        (is-variable pattern) (match-with-variable pattern binded-input other-bindings)
+        (= pattern binded-input) other-bindings
+        (segment-pattern)    )))
 
 
 (defn match-with-variable ; match-variable
