@@ -15,18 +15,20 @@ w; Created by: Erik Whipp
 ; ---- and
 ; ---- not
 ; -- helpers
-; ---- pat-match-abbrev 
 ; ---- expand-pat-match
 ; ---- abbreviate the table
 ; ---- variable-p DONE
 ; ---- pattern-matcher
 ; ---- segment-pattern-p DONE
 ; ---- single-pattern-p DONE
+; ---- single-match-fn DONE
 ; ---- segment-matcher
-; ---- single-matcher
+; ---- match-with-variable DONE
+; ---- single-matcher DONE 
 ; ---- segment-match-fn DONE
 ; -- Translators
 ; ---- match-abrev
+; ---- pat-match-abbrev 
 ; ---- expand-match-abrev
 ; ---- rules-based-translator
 ; ---- first-position-matcher DONE 
