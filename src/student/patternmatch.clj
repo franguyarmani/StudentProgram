@@ -174,7 +174,11 @@ w; Created by: Erik Whipp
     :else
         (true? (match-and (rest pattern) input-var (pattern-matcher-main (first pattern) input-var bindings)))))
 
-(defn match-not)
+(defn match-not
+    "No patterns match the input -- AKA nothing will ever bind using this function"
+    [pattern input-var bindings]
+    (if (match-or pattern input-var bindings) (println "Nothing matches, fam. Best of luck next time.")
+        bindings))
 
 ; Segment matcher to binding-table
 ; ==========================================================================
