@@ -17,15 +17,14 @@ w; Created by: Erik Whipp
 ; -- helpers
 ; ---- expand-pat-match
 ; ---- abbreviate the table
-; ---- variable-p DONE
-; ---- pattern-matcher
-; ---- segment-pattern-p DONE
-; ---- single-pattern-p DONE
-; ---- single-match-fn DONE
-; ---- segment-matcher
-; ---- match-with-variable DONE
-; ---- single-matcher DONE 
-; ---- segment-match-fn DONE
+; ---- variable-p           DONE
+; ---- pattern-matcher      DONE
+; ---- segment-pattern-p    DONE
+; ---- single-pattern-p     DONE
+; ---- single-match-fn      DONE
+; ---- match-with-variable  DONE
+; ---- single-matcher       DONE 
+; ---- segment-match-fn     DONE
 ; -- Translators
 ; ---- match-abrev
 ; ---- pat-match-abbrev 
@@ -59,6 +58,14 @@ w; Created by: Erik Whipp
 (defn segment-match-add)
     
 (defn segment-match?)
+
+(defn matches-segment-pattern?  ; segment-pattern? 
+    "Does this match (?+, ?-) "
+    [pattern]
+    (and (seq? pattern)
+    (seq? (first pattern))
+    (symbol? (ffirst pattern))))
+
 
 (defn match-if)
 
@@ -130,7 +137,7 @@ w; Created by: Erik Whipp
 (defn segment-matcher ; segment-matcher
     [pattern input-seg bindings]
     "Calls the correct function that corresponds to the input pattern"
-    (call-arg-on-remaining-args (segment-match-fn (ffirst pattern)))
+    (call-arg-on-remaining-args (segment-function-matcher (ffirst pattern)))
         pattern input-seg bindings)
 
 (defn single-function-pat-match ; single-matcher
@@ -156,7 +163,11 @@ w; Created by: Erik Whipp
         (= binded-input false) (println "failure to find a match")
         (is-variable pattern) (match-with-variable pattern binded-input other-bindings)
         (= pattern binded-input) other-bindings
-        (segment-pattern)    )))
+        (segment-pattern pattern) (segment-matcher pattern binded-input other-bindings)
+        (is-a-singular-pattern pattern) (single-function-pat-match pattern binded-input other-bindings)
+        (and (reject-empty-list pattern) (reject-empty-list binded-input))
+            (pattern-matcher-main (rest pattern) (rest binded-input)
+                (pattern-matcher-main (first pattern) (first binded-input) other-bindings)))))
 
 
 (defn match-with-variable ; match-variable
@@ -169,12 +180,6 @@ w; Created by: Erik Whipp
                 :else  ; if input-var equals end-binding --> return the binding
                 (println "Failure to match-with-var"))))  
 
-(defn matches-segment-pattern?  ; segment-pattern? 
-    "Does this match (?+, ?-) "
-    [pattern]
-    (and (seq? pattern)
-    (seq? (first pattern))
-    (symbol? (ffirst pattern))))
 
 (defn segment-match-fn ; same as book segment-match-fn
     "get the segment match func for x, if symbol? it is returned"
