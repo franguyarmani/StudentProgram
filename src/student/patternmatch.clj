@@ -47,11 +47,23 @@ w; Created by: Erik Whipp
      (apply arg remaining-args)) ; apply doesn't work because it needs to end with a list
 
 (defn find-duplicate-numbers 
+    "Finds duplicate numbers in a list"
     [numbers]
         (->> numbers
             (frequencies)
             (filter (fn [[k v]] (> v 1)))
             (keys)))
+
+(find-duplicate-numbers (concat '(1 2 3 4 5) '(1 2 3)))
+
+(find-non-duplicate-numbers
+    "Finds duplicate numbers in a list"
+    [numbers]
+        (->> numbers
+            (frequencies)
+            (filter (fn [[k v]] (= v 1)))
+            (keys))))
+
 (defn rest-between-two-indexes
     "Return the all values between two indexes
      Similar to substrings but for lists instead"
@@ -60,7 +72,11 @@ w; Created by: Erik Whipp
            rev-x (reverse x-list)
            startnew x-start
            endnew x-end]
-    (take (- endnew startnew) (drop (- endnew startnew) reg-x)))) ; take good to go --> drop
+           (drop startnew reg-x)
+           (drop (- endnew startnew) rev-x)
+           (take (- endnew startnew) (find-duplicate-numbers (concat reg-x rev-x)))))
+
+           (rest-between-two-indexes '(1 2 3 4 5) 1 4)
 ; Table of available bindings
 ; ==========================================================================
 (def binding-table
