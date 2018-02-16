@@ -33,6 +33,19 @@
 ; ---- first-position-matcher DONE 
 ;
 (use 'clojure.test)
+; Forward declarations
+; ==========================================================================
+(declare single-function-matcher)
+(declare pos-seq-satisfy)
+(declare first-possible-match)
+(declare segment-match)
+(declare segment-match-add)
+(declare segment-match?)
+(declare match-if)
+(declare match-is)
+
+
+
 
 ; Helper functions to do random shit
 ; ==========================================================================
@@ -259,3 +272,5 @@
         (and (reject-empty-list pattern) (reject-empty-list binded-input))
             (pattern-matcher-main (rest pattern) (rest binded-input)
                 (pattern-matcher-main (first pattern) (first binded-input) other-bindings)))))
+
+(pattern-matcher-main '(= x (?is ?n int)) '(= x 34))
