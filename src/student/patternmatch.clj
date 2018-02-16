@@ -147,11 +147,27 @@ w; Created by: Erik Whipp
     (and (binding ())))
 
 ; Singles
-(defn match-is)
+(defn match-is
+    "Succeed and bind the var if the input is satisfied
+     var is the list"
+     [var input-var bindings]
+     (let* [var-list (first var)
+            pred (second var)
+            find-new-binding (pattern-matcher-main var-list input-var bindings)]
+        (if (or (nil? find-new-binding) (not (call-arg-on-remaining-args pred input-var)))
+            (println "The binding has failed")
+            find-new-binding)))
 
-(defn match-or)
+(defn match-or
+    "If any one of the inputs match something in the list"
+    [pattern input-var bindings]
+    (if (nil? pattern) (println "There are no values that match")
+    (let [new-binding (pattern-matcher-main (first pattern) input-var bindings)]
+        (if (nil? new-binding)
+            (match-or (rest pattern) input-var bindings) new-binding))))
 
-(defn match-and)
+(defn match-and
+    )
 
 (defn match-not)
 
