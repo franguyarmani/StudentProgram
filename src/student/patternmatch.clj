@@ -29,23 +29,48 @@ w; Created by: Erik Whipp
 ; ---- match-abrev
 ; ---- pat-match-abbrev 
 ; ---- expand-match-abrev
-; ---- rules-based-translator
+; ---- rules-based-translator 
 ; ---- first-position-matcher DONE 
 ;
-;
-;
-;
-;
+
+; Helper functions to do random shit
+; ==========================================================================
+(defn reject-empty-list ; consp in common-lisp 
+    "Only accept a list if it isn't empty"
+    [object]
+    (and (list? object) (not (empty? object))))
+
+(defn call-arg-on-remaining-args ; funcall
+    "Calls an argument on the optionals provided after the initial argument
+     eg: (call-arg-on-remaining-args #'* 2 2 2) OUTPUT: 8"
+    [arg & remaining-args]
+     (apply arg remaining-args)) ; apply doesn't work because it needs to end with a list
+
+(defn find-duplicate-numbers 
+    [numbers]
+        (->> numbers
+            (frequencies)
+            (filter (fn [[k v]] (> v 1)))
+            (keys)))
+(defn rest-between-two-indexes
+    "Return the all values between two indexes
+     Similar to substrings but for lists instead"
+    [x-list x-start x-end]
+     (let [reg-x x-list
+           rev-x (reverse x-list)
+           startnew x-start
+           endnew x-end]
+    (take (- endnew startnew) (drop (- endnew startnew) reg-x)))) ; take good to go --> drop
 ; Table of available bindings
 ; ==========================================================================
 (def binding-table
-    {:segment-match {'?* segment-match-mul '?+ segment-match-add '?? segment-match? '?if match-if}
-    :single-match {'?is match-is '?or match-or '?and match-and '?not match-not}})
+    {:segment-match {'?* segment-match '?+ segment-match-add '?? segment-match? '?if match-if}
+     :single-match  {'?is match-is '?or match-or '?and match-and '?not match-not}})
 
 ; Binding functions
 ; ==========================================================================
 ; Segments
-(defn segment-match-mul ; Need pattern match
+(defn segment-match ; Need pattern match
     "Match against ?* pattern"
     [pattern input-var bindings & optionals (start 0)]
     (let [var (second (first pattern))
@@ -53,7 +78,8 @@ w; Created by: Erik Whipp
           (if (nil? in-pattern) (match-with-variable var input-var bindings)
           (let [pos (first-possible-match (first pattern) input-var start)]
             (if (nil? pos) (println "failure to find match")
-                (let [try-again (pat-match)] ))))))
+                (let [try-again (pattern-matcher-main in-pattern (nthrest input-var pos)
+                      (match-with-variable var (nthrest input )) )] ))))))
 
 (defn segment-match-add)
     
@@ -110,18 +136,6 @@ w; Created by: Erik Whipp
     "Is x a variable that begins with ?"
     (and (symbol? x) (= \? (first (name x)))))
 
-(defn reject-empty-list ; consp in common-lisp 
-    [object]
-    "Only accept a list if it isn't empty"
-    (and (list? object) (not (empty? object))))
-
-(defn call-arg-on-remaining-args ; funcall
-    [arg & remaining-args]
-    "Calls an argument on the optionals provided after the initial argument
-     eg: (call-arg-on-remaining-args #'* 2 2 2) OUTPUT: 8"
-     (apply arg remaining-args)) ; apply doesn't work because it needs to end with a list
-
-
 (defn segment-pattern ; segment-pattern-p
     [pattern]
     "Does this match ?* var :pattern"
@@ -156,6 +170,17 @@ w; Created by: Erik Whipp
     "Call the right function for a single pattern"
     (when (symbol? x) (get x :single-match)))
 
+
+(defn match-with-variable ; match-variable
+    "Does the input-var match with the input? Returns ult-binding"
+    [input-var input ult-binding]
+    (let [binded-value  (ult-binding input-var)]
+        (cond
+            (nil? binded-value) (assoc ult-binding input-var input) ; if nil --> associate input-var with input so Nil
+            (= input-var binded-value) ult-binding
+                :else  ; if input-var equals end-binding --> return the binding
+                (println "Failure to match-with-var"))))  
+
 (defn pattern-matcher-main ; pat-match
     ([pattern binded-input & [optional other-bindings]]
     "match the patterns with input through a binding"
@@ -168,22 +193,3 @@ w; Created by: Erik Whipp
         (and (reject-empty-list pattern) (reject-empty-list binded-input))
             (pattern-matcher-main (rest pattern) (rest binded-input)
                 (pattern-matcher-main (first pattern) (first binded-input) other-bindings)))))
-
-
-(defn match-with-variable ; match-variable
-    "Does the input-var match with the input? Returns ult-binding"
-    [input-var input ult-binding]
-    (let [binded-value  (ult-binding input-var)]
-        (cond
-            (nil? binded-value) (assoc ult-binding input-var input) ; if nil --> associate input-var with input so Nil
-            (= input-var binded-value) ult-binding
-                :else  ; if input-var equals end-binding --> return the binding
-                (println "Failure to match-with-var"))))  
-
-
-(defn segment-match-fn ; same as book segment-match-fn
-    "get the segment match func for x, if symbol? it is returned"
-    [var]
-    (when (symbol? var) (get binding-table :segment-match) var)) 
-    ;https://clojuredocs.org/clojure.core/deref @ deref for table
-            
