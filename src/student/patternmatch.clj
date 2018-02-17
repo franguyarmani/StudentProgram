@@ -43,7 +43,11 @@
 (declare segment-match?)
 (declare match-if)
 (declare match-is)
-
+(declare match-or)
+(declare match-not)
+(declare match-and)
+(declare match-with-variable)
+(declare pattern-matcher-main)
 
 
 
@@ -137,8 +141,7 @@
 (defn match-if
     "Tests for the patter (?if expre) rest of sentence"
     [pattern input-var bindings]
-    ([[v pred] pattern 
-        new-bindings (pattern-matcher-main v input-var bindings)]
+    ([[v pred] pattern new-bindings (pattern-matcher-main v input-var bindings)]
         (if (or (= new-binding nil) (not ((resolve pred) input-var)))
         (println "Failed to find if var")
         new-bindings)))
