@@ -181,7 +181,7 @@
      return the starting position" 
      (cond 
         (and (atom first-pattern) (not (is-variable first-pattern))) ; atoms are essential to this https://clojure.org/reference/atoms
-        (pos-seq-satisfy (partial = first-pattern) input start)
+        (pos-seq-satisfy (partial = first-pattern) input start)      ; @eric not sure if the cunction atom is the same in clojure and lisp. (atom first-pattern) will return a pattern object when called, in this case is equivalent to always true
         (<= start ( count input )) start    
             :else nil))         
 
