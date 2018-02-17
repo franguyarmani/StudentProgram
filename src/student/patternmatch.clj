@@ -112,7 +112,7 @@
     ([pattern input-var bindings]
         (segment-match pattern input-var bindings 0))
     ([pattern input-var bindings start]
-    (let [var (second (first pattern))
+    (let [var (second (first pattern))  
           in-pattern (rest pattern)]
           (if (nil? in-pattern) (match-with-variable var input-var bindings)
           (let [pos (first-possible-match (first pattern) input-var start)]
@@ -139,7 +139,7 @@
     (symbol? (ffirst pattern))))
 
 (defn match-if
-    "Tests for the patter (?if expre) rest of sentence"
+    "Tests for the pattern (?if expre) rest of sentence"
     [pattern input-var bindings]
     ([[v pred] pattern new-bindings (pattern-matcher-main v input-var bindings)]
         (if (or (= new-binding nil) (not ((resolve pred) input-var)))
