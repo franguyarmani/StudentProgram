@@ -1,4 +1,4 @@
-; Created by: Erik Whipp 
+; Created by: Erik , Francis, and Nora
 ; &copy; 2018
 ; Ain't got no license, doe muhfucka
 
