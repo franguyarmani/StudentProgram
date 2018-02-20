@@ -203,7 +203,47 @@
                                                  (first input)
                                                  bindings))
            :else fail)))
-  
+ 
+           
+;; Rule based translator
+;; ================================================================================
+(defn call-arg-on-remaining-args ; funcall
+    "Calls an argument on the optionals provided after the initial argument
+     eg: (call-arg-on-remaining-args #'* 2 2 2) OUTPUT: 8"
+    [arg & remaining-args]
+     (apply arg remaining-args))
+
+(def abbreviation-table
+    (atom {}))
+
+(defn expand-pat-match-abbrev
+    "Expand all pattern matching abbreviations in pat"
+    [pat]
+    (cond
+        (symbol? pat) (get @abbreviation-table pat pat)
+        (empty? pat) pat
+            :else (cons (expand-pat-match-abbrev (first pat))
+                        (expand-pat-match-abbrev (rest pat)))))
+
+(defn pat-match-abbrev
+    "Define symbol as macro and swap for a pat-match(ed) patted"
+    [sym expansion]
+    (swap! abbrev-table (fn [x] (assoc x sym expansion)))
+        (expand-pat-match-abbrev expansion))
+
+
+(defn rule-based-translator
+    [input rules & keys ]
+    (let [matcher pat-match
+          action postwalk-replace]
+    (some 
+        (fn [rule]
+            (let [result (matcher (first rule) input)]
+                (if (not (= result fail))
+                    (action result (rest rule))))) rules)))
+
+(pat-match-abbrev '?x* '(?* ?x))
+(pat-match-abbrev '?y* '(?* ?y))
 ;; Begin Student 
 ;; ================================================================================ 
   
