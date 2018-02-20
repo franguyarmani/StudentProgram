@@ -239,7 +239,7 @@
           action postwalk-replace]
     (some 
         (fn [rule]
-            (println rule)
+            (println (first rule))
             (let [result (matcher (first rule) input)]
                 (if (not (= result fail))
                     (action result (rest rule))))) rules)))
