@@ -247,6 +247,10 @@
 ;; Begin Student 
 ;; ================================================================================ 
   
+(defn translate-to-expression [word]
+  "Translate the problem state in 'words' to and equation of expression"
+  ())
+
   (defn -main
     "I don't do a whole lot ... yet."
     [& args]
