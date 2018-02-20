@@ -1,4 +1,5 @@
 (ns student.student
+    (:use clojure.walk)
     (:gen-class))
   
 ;; Begin Pattern Matching
@@ -146,12 +147,22 @@
           pat (rest pattern)]
       (or (pat-match (conj pat v) input bindings)
           (pat-match pat input bindings))))
+
+(defn segment-match-if
+    "Test if an arbitrary input is true"
+    [pattern input bindings]
+    (let [f (postwalk-replace bindings (second (first pattern)))] ; Replace all occurrences of ?var with appropriate bindings using a map
+        (when (eval f)
+            (pat-match (rest pattern) input bindings))))
+
+
   
   (def segment-matcher-table
     "Table mapping segment matcher names to matching functions."
     {'?* segment-match-*
      '?+ segment-match-+
-     '?? segment-match-?})
+     '?? segment-match-?
+     '?if segment-match-if})
   
   (defn single-pattern?
     "Is this a single-matching pattern?"
