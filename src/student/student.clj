@@ -262,13 +262,14 @@
     "Turn 1 + 2 into + 1 2" 
     [exp] ; method for taking it from a list
     (list (second exp) (first exp) (nth exp 2)))
+
     (comment 
 (defn make-expression ; Are we going to be taking this from the student list of rules '(1 + 2) or will it be 3 vars? (1 + 2)
   [lhs op rhs]
   (conj '() (quote (symbol op) lhs rhs)))) ; Method for taking it from three vars -- Couldn't figure this out
 
 
-(defn noise-word-p
+(defn noise-word-p ; CHECK according to the book
   "A word we don't really care about"
   [word]
   (contains? word '(a an the this number of $)))
@@ -289,10 +290,10 @@
 
 
 
-(defn unknown-parameter
+(defn unknown-parameter ;
     "Is the argument an unknown variable?"
     [expression]
-    (symbol expression))
+    (symbol? expression))
 
 (defn param-in-expression
     "Returns true if the parameter is in the
