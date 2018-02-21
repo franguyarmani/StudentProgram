@@ -252,9 +252,9 @@
 ;; Begin Student 
 ;; ================================================================================ 
 
-(defstruct rule (:type list)) pattern response)
+(defstruct rule  :pattern :response) ; https://clojure.org/reference/data_structures
 
-(defstruct exp (:type list) ; http://hyperpolyglot.org/lisp
+(defstruct exp (:type list) ; http://hyperpolyglot.org/lisp Definitely not right --> some thing to figure out
                 (:constructor mkexp (left-hand-side operand right-hand-side))
                 operand left-hand-side right-hand-side)
 
@@ -267,18 +267,27 @@
   [lhs op rhs]
   (conj '() (quote (symbol op) lhs rhs)))) ; Method for taking it from three vars -- Couldn't figure this out
 
-(make-expression (1 + 2))
 
-(defn )
+(defn noise-word-p
+  "A word we don't really care about"
+  [word]
+  (contains? word '(a an the this number of $)))
 
 (def operators-and-their-inverses
-    "Helper function for return-inverse-operation"
+    "Helper variables for return-inverse-operation"
     '((+ -) (- +) (* /) (/ *) (= =)))
 
-(defn return-inverse-operation
+(defn return-inverse-operation ; CHECK
     "Return the inverse operation"
-    [operation]
-    (second (assoc operation operators-and-their-inverses)))
+    [operation ops-inverse]
+    (let [inverse-poss ops-inverse]
+      (println inverse-poss)
+      (if (= (ffirst inverse-poss)) operation) 
+        (first (second inverse-poss))
+      (if (not (= (ffirst inverse-poss) operation)) 
+        (return-inverse-operation operation (rest inverse-poss) ) (second (first inverse-poss)))))
+
+
 
 (defn unknown-parameter
     "Is the argument an unknown variable?"
@@ -332,6 +341,12 @@
 (def ^:dynamic *student-rules* 
   (map expand-pat-match-abbrev basic-student-rules))
 
+
+(defn student
+  [input]
+  (solve-equations
+    (create-list-of-expressions
+      (translate-to-expression ))))
 
 (defn translate-to-expression [word]
   "Translate the problem state in 'words' to and equation of expression"
