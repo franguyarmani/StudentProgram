@@ -217,6 +217,11 @@
     [arg & remaining-args]
      (apply arg remaining-args))
 
+(defn reject-empty-list ; consp in common-lisp 
+      "Only accept a list if it isn't empty"
+      [object]
+      (and (list? object) (not (empty? object))))
+
 (def abbreviation-table
     (atom {}))
 
@@ -257,6 +262,14 @@
 (defstruct exp (:type list) ; http://hyperpolyglot.org/lisp Definitely not right --> some thing to figure out
                 (:constructor mkexp (left-hand-side operand right-hand-side))
                 operand left-hand-side right-hand-side)
+
+(defn exp-p ; is an expression parameter? --> see book for more
+  [x]
+  (reject-empty-list x))
+
+(defn exp-args ; rest of expression arguments 
+  [x]          ; --> exp-p and exp-args will be used in conjuction
+  (rest x))
 
 (defn make-expression
     "Turn 1 + 2 into + 1 2" 
@@ -302,6 +315,18 @@
     (or (= param expression)
             (and (coll? expression))))
 
+(defn commutative-p
+  "Is the operation commutative (* + =)?"
+  [operand]
+  (contains? operand '(+ = *)))
+
+(defn make-var-for-word
+  "Will make a variable given a word (ex: Tom has 3 assignments and 2 days to do it. Will he have enough days?
+    Word = Assignment = 3
+    Word = days = 2
+    We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
+    [input-words]
+    (first input-words))
 
 (def basic-student-rules 
   '(((?x* .)                  ?x)
