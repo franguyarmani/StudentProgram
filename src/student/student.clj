@@ -1,6 +1,7 @@
 (ns student.student
     (:use clojure.walk)
     (:use clojure.pprint) ; common lisp formatting
+    (:use clojure.stacktrace) 
     (:gen-class))
   
 ;; Begin Pattern Matching
@@ -312,19 +313,30 @@
   "Is the operation commutative (* + =)?"
   [operand]
   (contains? operand '(+ = *)))
-
+  
 (defn make-var-for-word
   "Will make a variable given a word (ex: Tom has 3 assignments and 2 days to do it. Will he have enough days?
     Word = Assignment = 3
     Word = days = 2
     We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
     [input-words]
-    (first input-words))
+    (first input-words)))
 
-    (defn binary-expre-p
+(defn binary-expre-p
       "Is the input expression binary?"
       [expre]
       (and (exp-p expre) (= (count (exp-args expre)) 2)))
+
+(defn prefix-to-infix-notation ; atom in cl == (not (seq? x)) in clojure  NOT WORKING
+        "Translate from prefix to infix notation
+         EX: Infix  --> X + Y
+         EX: Prefix --> + X Y"
+         [expre]
+         (if (not (seq? expre)) expre) ; works
+           (if (binary-expre-p expre)
+             (map prefix-to-infix-notation 
+                (list (second expre) (first expre) (nth expre 2))) expre)) ; We need to create a left hand side and right hand side representation
+                          ; the expression.
 
 (pat-match-abbrev '?x* '(?* ?x))
 (pat-match-abbrev '?y* '(?* ?y))
@@ -364,10 +376,6 @@
    ; ((?x* % more than ?y*)  (* ?y (/ (+ 100 ?x) 100)))
    ; ((?x* % ?y*)            (* (/ ?x 100) ?y))))
 
-
-(def ^:dynamic *student-rules* 
-  (map expand-pat-match-abbrev basic-student-rules))
-
 ; STUDENT FUNCTIONS NOT COMPLETED
 ; ===================================================================================
 ; Figuring out how to represent left and right side of equations ?
@@ -379,8 +387,7 @@
 
 (defn in-exp
   "Return true if input is within the expression"
-  [x expre]
-  )
+  [x expre])
 
 
 (defn no-unknown-var
@@ -397,26 +404,17 @@
    correct form"
    [equation])
 
-(defn prefix-to-infix-notation ; atom in cl == (not (seq? x)) in clojure  NOT WORKING
-  "Translate from prefix to infix notation
-   EX: Infix  --> X + Y
-   EX: Prefix --> + X Y"
-   [expre]
-   (if (not (seq? expre)) expre)
-      (map prefix-to-infix-notation
-        (if (binary-expre-p expre)
-          (list (second expre) (first expre) (nth expre 2)) expre))) ; We need to create a left hand side and right hand side representation
-                    ; the expression.
 
-(prefix-to-infix-notation '(+ 1 2))
-(if (not (seq? 1)) 2)
 
 (defn print-equation
   "Format and print the equation so we can
    see the student work"
    [header equation]
-   (cl-format true "~%~a{~%  ~a~}~}~%" header
+   (cl-format true "~%~a~{~%  ~{ ~a~}~}~%" header
      (map prefix-to-infix-notation equation))) ; Complete prefix-to-infix-notation and this is complete
+
+(print-equation "The equation to be solved is" '(+ (+ 4 5) 3))
+
 
 (defn isolate
   "Isolate the lone x in e on the left hand side of e
