@@ -4,6 +4,9 @@
   
 ;; Begin Pattern Matching
 ;; ================================================================================
+(def comma
+    (symbol ","))
+
 (defn index-in-seq
     "Finds the index of item in the given sequence; the optional start parameter
     specifies the starting index to start looking from. Returns -1 when not found.
@@ -190,6 +193,7 @@
   (defn pat-match
     ([pattern input] (pat-match pattern input no-bindings))
     ([pattern input bindings]
+        (println pattern)
      (cond (= bindings fail) fail
            (variable? pattern) (match-variable pattern input bindings)
            (= pattern input) bindings
@@ -227,10 +231,9 @@
 
 (defn pat-match-abbrev
     "Define symbol as macro and swap for a pat-match(ed) patted"
-    [sym expansion]
+    [sym expansion] ; symbol expansion
     (swap! abbreviation-table (fn [x] (assoc x sym expansion)))
         (expand-pat-match-abbrev expansion))
-
 
 (defn rule-based-translator
     [input rules & keys ]
@@ -252,17 +255,17 @@
 (def basic-student-rules 
   '(((?x* .)                  ?x)
     ((?x* . ?y*)          (?x ?y))
-    (('if ?x* (symbol ",") 'then ?y*)  (?x ?y))
-    (('if ?x* then ?y*)      (?x ?y))
-    (('if ?x* (symbol ",") ?y*)       (?x ?y))
-    ((?x* (symbol ",") and ?y*)      (?x ?y))
+    ((?if ?x* (symbol ",") then ?y*)  (?x ?y))
+    ((?if ?x* then ?y*)              (?x ?y))
+    ((?if ?x* (symbol ",") ?y*)       (?x ?y))
+   ; ((?x* (symbol ,) and ?y*)      (?x ?y))
     ((find ?x* and ?y*)     ((= to-find-1 ?x) (= to-find-2 ?y)))
     ((find ?x*)             (= to-find ?x))
     ((?x* equals ?y*)       (= ?x ?y))
     ((?x* same as ?y*)      (= ?x ?y))
     ((?x* = ?y*)            (= ?x ?y))
     ((?x* is equal to ?y*)  (= ?x ?y))
-    ((?x* is ?y*)           (= ?x ?y))u
+    ((?x* is ?y*)           (= ?x ?y))
     ((?x* - ?y*)            (- ?x ?y))
     ((?x* minus ?y*)        (- ?x ?y))
     ((difference between ?x* and ?y*)  (- ?y ?x))
@@ -279,10 +282,10 @@
     ((half ?x*)             (/ ?x 2))
     ((one half ?x*)         (/ ?x 2))
     ((twice ?x*)            (* 2 ?x))
-    ((square ?x*)           (* ?x ?x))
-    ((?x* % less than ?y*)  (* ?y (/ (- 100 ?x) 100)))
-    ((?x* % more than ?y*)  (* ?y (/ (+ 100 ?x) 100)))
-    ((?x* % ?y*)            (* (/ ?x 100) ?y))))
+    ((square ?x*)           (* ?x ?x))))
+   ; ((?x* % less than ?y*)  (* ?y (/ (- 100 ?x) 100)))
+   ; ((?x* % more than ?y*)  (* ?y (/ (+ 100 ?x) 100)))
+   ; ((?x* % ?y*)            (* (/ ?x 100) ?y))))
 
 
 (def ^:dynamic *student-rules* 
