@@ -321,6 +321,11 @@
     [input-words]
     (first input-words))
 
+    (defn binary-expre-p
+      "Is the input expression binary?"
+      [expre]
+      (and (exp-p expre) (= (count (exp-args expre)) 2)))
+
 (pat-match-abbrev '?x* '(?* ?x))
 (pat-match-abbrev '?y* '(?* ?y))
 
@@ -392,17 +397,9 @@
    correct form"
    [equation])
 
-(defn binary-expre-p
-  "Is the input expression binary?"
-  [expre]
-  (and (exp-p expre) (= (count (exp-args expre)) 2)))
-
-(binary-expre-p '(3 + 4))
-(binary-expre-p '(5 - 2))
-
-(defn prefix-to-infix-notation ; atom in cl == (not (seq? x)) in clojure  NOT WORKING YET
+(defn prefix-to-infix-notation ; atom in cl == (not (seq? x)) in clojure  NOT WORKING
   "Translate from prefix to infix notation
-   EX: Infix --> X + Y
+   EX: Infix  --> X + Y
    EX: Prefix --> + X Y"
    [expre]
    (if (not (seq? expre)) expre)
@@ -411,7 +408,8 @@
           (list (second expre) (first expre) (nth expre 2)) expre))) ; We need to create a left hand side and right hand side representation
                     ; the expression.
 
-(prefix-to-infix-notation '(+ 3 4))
+(prefix-to-infix-notation '(+ 1 2))
+(if (not (seq? 1)) 2)
 
 (defn print-equation
   "Format and print the equation so we can
