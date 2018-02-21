@@ -1,8 +1,7 @@
 (ns student.student
     (:use clojure.walk)
     (:gen-class))
- 
-(use 'clojure.stacktrace)    
+  
 ;; Begin Pattern Matching
 ;; ================================================================================
 (def comma
@@ -237,37 +236,70 @@
         (expand-pat-match-abbrev expansion))
 
 (defn rule-based-translator
+    "Apply a set of rules"
     [input rules & keys ]
     (let [matcher pat-match
           action postwalk-replace]
     (some 
         (fn [rule]
+            (println rule)
             (let [result (matcher (first rule) input)]
                 (if (not (= result fail))
-                    (action result (rest rule))))) rules))
-    (println input))
+                    (action result (rest rule))))) rules)))
 
 (pat-match-abbrev '?x* '(?* ?x))
 (pat-match-abbrev '?y* '(?* ?y))
 ;; Begin Student 
 ;; ================================================================================ 
 
+(defstruct rule (:type list)) pattern response)
+
+(defstruct exp (:type list) ; http://hyperpolyglot.org/lisp
+                (:constructor mkexp (left-hand-side operand right-hand-side))
+                operand left-hand-side right-hand-side)
+
+(defn make-expression
+    "Turn 1 + 2 into + 1 2" 
+    [exp] ; method for taking it from a list
+    (list (second exp) (first exp) (nth exp 2)))
+    (comment 
+(defn make-expression ; Are we going to be taking this from the student list of rules '(1 + 2) or will it be 3 vars? (1 + 2)
+  [lhs op rhs]
+  (conj '() (quote (symbol op) lhs rhs)))) ; Method for taking it from three vars -- Couldn't figure this out
+
+(make-expression (1 + 2))
+
+(defn )
+
+(def operators-and-their-inverses
+    "Helper function for return-inverse-operation"
+    '((+ -) (- +) (* /) (/ *) (= =)))
+
+(defn return-inverse-operation
+    "Return the inverse operation"
+    [operation]
+    (second (assoc operation operators-and-their-inverses)))
+
+(defn unknown-parameter
+    "Is the argument an unknown variable?"
+    [expression]
+    (symbol expression))
+
+(defn param-in-expression
+    "Returns true if the parameter is in the
+     expression."
+    [param expression]
+    (or (= param expression)
+            (and (coll? expression))))
+
 
 (def basic-student-rules 
-  '(
-    ((?x* .)                  ?x)
+  '(((?x* .)                  ?x)
     ((?x* . ?y*)          (?x ?y))
-<<<<<<< HEAD
     ((?if ?x* (symbol ",") then ?y*)  (?x ?y))
     ((?if ?x* then ?y*)              (?x ?y))
     ((?if ?x* (symbol ",") ?y*)       (?x ?y))
    ; ((?x* (symbol ,) and ?y*)      (?x ?y))
-=======
-    ; ((?x* (symbol ",") then ?y*)  (?x ?y))
-    ((if ?x* then ?y*)      (?x ?y))
-    ; ((if ?x* (symbol ",") ?y*)       (?x ?y))
-    ; ((?x* (symbol ",") and ?y*)      (?x ?y))
->>>>>>> b04dc07b4338bf69e803c7f046bf98e692e357d0
     ((find ?x* and ?y*)     ((= to-find-1 ?x) (= to-find-2 ?y)))
     ((find ?x*)             (= to-find ?x))
     ((?x* equals ?y*)       (= ?x ?y))
@@ -288,7 +320,6 @@
     ((?x* / ?y*)            (/ ?x ?y))
     ((?x* per ?y*)          (/ ?x ?y))
     ((?x* divided by ?y*)   (/ ?x ?y))
-<<<<<<< HEAD
     ((half ?x*)             (/ ?x 2))
     ((one half ?x*)         (/ ?x 2))
     ((twice ?x*)            (* 2 ?x))
@@ -296,16 +327,6 @@
    ; ((?x* % less than ?y*)  (* ?y (/ (- 100 ?x) 100)))
    ; ((?x* % more than ?y*)  (* ?y (/ (+ 100 ?x) 100)))
    ; ((?x* % ?y*)            (* (/ ?x 100) ?y))))
-=======
-    ; ((half ?x*)             (/ ?x 2))
-    ; ((one half ?x*)         (/ ?x 2))
-    ; ((twice ?x*)            (* 2 ?x))
-    ((square ?x*)           (* ?x ?x))
-    ; ((?x* % less than ?y*)  (* ?y (/ (- 100 ?x) 100)))
-    ; ((?x* % more than ?y*)  (* ?y (/ (+ 100 ?x) 100)))
-    ; ((?x* % ?y*)            (* (/ ?x 100) ?y))
-    ))
->>>>>>> b04dc07b4338bf69e803c7f046bf98e692e357d0
 
 
 (def ^:dynamic *student-rules* 
