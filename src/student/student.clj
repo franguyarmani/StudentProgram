@@ -325,12 +325,12 @@
 (pat-match-abbrev '?y* '(?* ?y))
 
 (def basic-student-rules 
-  '(((?x* .)                  ?x)
-    ((?x* . ?y*)          (?x ?y))
+  '(((?x* .)                            ?x)
+    ((?x* . ?y*)                   (?x ?y))
     ((?if ?x* (symbol ",") then ?y*)  (?x ?y))
-    ((?if ?x* then ?y*)              (?x ?y))
-    ((?if ?x* (symbol ",") ?y*)       (?x ?y))
-   ; ((?x* (symbol ,) and ?y*)      (?x ?y))
+    ((?if ?x* then ?y*)            (?x ?y))
+    ((?if ?x* (symbol ",") ?y*)    (?x ?y))
+   ;((?x* (symbol ,) and ?y*)      (?x ?y))
     ((find ?x* and ?y*)     ((= to-find-1 ?x) (= to-find-2 ?y)))
     ((find ?x*)             (= to-find ?x))
     ((?x* equals ?y*)       (= ?x ?y))
@@ -366,9 +366,7 @@
 ; STUDENT FUNCTIONS NOT COMPLETED
 ; ===================================================================================
 ; Figuring out how to represent left and right side of equations ?
-(defstruct exp (:type list) ; http://hyperpolyglot.org/lisp Definitely not right --> some thing to figure out
-  (:constructor mkexp (left-hand-side operand right-hand-side))
-  operand left-hand-side right-hand-side)
+ ; We want to use defrecords/deftype --> structs are becoming obselete
 
 ; Figuring out how to represent our list of options ?
 (defstruct rule  :pattern :response) ; https://clojure.org/reference/data_structures
@@ -377,7 +375,7 @@
 (defn in-exp
   "Return true if input is within the expression"
   [x expre]
-  (or (= )
+  )
 
 
 (defn no-unknown-var
@@ -396,13 +394,24 @@
 
 (defn binary-expre-p
   "Is the input expression binary?"
-  [expre])
+  [expre]
+  (and (exp-p expre) (= (count (exp-args expre)) 2)))
 
-(defn prefix-to-infix-notation
+(binary-expre-p '(3 + 4))
+(binary-expre-p '(5 - 2))
+
+(defn prefix-to-infix-notation ; atom in cl == (not (seq? x)) in clojure  NOT WORKING YET
   "Translate from prefix to infix notation
    EX: Infix --> X + Y
    EX: Prefix --> + X Y"
-   [expre])
+   [expre]
+   (if (not (seq? expre)) expre)
+      (map prefix-to-infix-notation
+        (if (binary-expre-p expre)
+          (list (second expre) (first expre) (nth expre 2)) expre))) ; We need to create a left hand side and right hand side representation
+                    ; the expression.
+
+(prefix-to-infix-notation '(+ 3 4))
 
 (defn print-equation
   "Format and print the equation so we can
