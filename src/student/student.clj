@@ -222,6 +222,12 @@
       [object]
       (and (list? object) (not (empty? object))))
 
+(defn append-to ; For use in create-list-of-equations DOUBLE CHECK
+  "Append all values to a list and sort it
+   (append-to '(1 2 3) '() '(4 5 6) '1) --> (1 1 2 3 4 5 6)" 
+  [& input]
+  (sort (flatten (conj input))))
+
 (def abbreviation-table
     (atom {}))
 
@@ -369,7 +375,8 @@
 
 (defn in-exp
   "Return true if input is within the expression"
-  [x expre])
+  [x expre]
+  (or (= )
 
 
 (defn no-unknown-var
