@@ -257,10 +257,12 @@
   '(
     ((?x* .)                  ?x)
     ((?x* . ?y*)          (?x ?y))
-    ;((?if ?x* (symbol ",") then ?y*)  (?x ?y))
-    ;((?if ?x* then ?y*)              (?x ?y))
-    ;((?if ?x* (symbol ",") ?y*)       (?x ?y))
+<<<<<<< HEAD
+    ((?if ?x* (symbol ",") then ?y*)  (?x ?y))
+    ((?if ?x* then ?y*)              (?x ?y))
+    ((?if ?x* (symbol ",") ?y*)       (?x ?y))
    ; ((?x* (symbol ,) and ?y*)      (?x ?y))
+=======
     ; ((?x* (symbol ",") then ?y*)  (?x ?y))
     ((if ?x* then ?y*)      (?x ?y))
     ; ((if ?x* (symbol ",") ?y*)       (?x ?y))
@@ -286,13 +288,15 @@
     ((?x* / ?y*)            (/ ?x ?y))
     ((?x* per ?y*)          (/ ?x ?y))
     ((?x* divided by ?y*)   (/ ?x ?y))
-    ;((half ?x*)             (/ ?x 2))
-    ;((one half ?x*)         (/ ?x 2))
-    ;((twice ?x*)            (* 2 ?x))
-    ;((square ?x*)           (* ?x ?x))))
+<<<<<<< HEAD
+    ((half ?x*)             (/ ?x 2))
+    ((one half ?x*)         (/ ?x 2))
+    ((twice ?x*)            (* 2 ?x))
+    ((square ?x*)           (* ?x ?x))))
    ; ((?x* % less than ?y*)  (* ?y (/ (- 100 ?x) 100)))
    ; ((?x* % more than ?y*)  (* ?y (/ (+ 100 ?x) 100)))
    ; ((?x* % ?y*)            (* (/ ?x 100) ?y))))
+=======
     ; ((half ?x*)             (/ ?x 2))
     ; ((one half ?x*)         (/ ?x 2))
     ; ((twice ?x*)            (* 2 ?x))
