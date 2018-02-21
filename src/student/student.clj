@@ -1,5 +1,6 @@
 (ns student.student
     (:use clojure.walk)
+    (:use clojure.pprint) ; common lisp formatting
     (:gen-class))
   
 ;; Begin Pattern Matching
@@ -406,7 +407,9 @@
 (defn print-equation
   "Format and print the equation so we can
    see the student work"
-   [header equation])
+   [header equation]
+   (cl-format true "~%~a{~%  ~a~}~}~%" header
+     (map prefix-to-infix-notation equation))) ; Complete prefix-to-infix-notation and this is complete
 
 (defn isolate
   "Isolate the lone x in e on the left hand side of e
