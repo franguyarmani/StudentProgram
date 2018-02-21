@@ -301,8 +301,6 @@
       (if (not (= (ffirst inverse-poss) operation)) 
         (return-inverse-operation operation (rest inverse-poss) ) (second (first inverse-poss)))))
 
-
-
 (defn unknown-parameter ;
     "Is the argument an unknown variable?"
     [expression]
@@ -367,12 +365,6 @@
 (def ^:dynamic *student-rules* 
   (map expand-pat-match-abbrev basic-student-rules))
 
-
-(defn student
-  [input]
-  (solve-equations
-    (create-list-of-expressions
-      (translate-to-expression ))))
 
 (defn translate-to-expression [word]
   "Translate the problem state in 'words' to and equation of expression"
