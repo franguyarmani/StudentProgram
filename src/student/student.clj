@@ -239,10 +239,10 @@
           action postwalk-replace]
     (some 
         (fn [rule]
-            (println (first rule))
             (let [result (matcher (first rule) input)]
                 (if (not (= result fail))
-                    (action result (rest rule))))) rules)))
+                    (action result (rest rule))))) rules))
+    (println input))
 
 (pat-match-abbrev '?x* '(?* ?x))
 (pat-match-abbrev '?y* '(?* ?y))
