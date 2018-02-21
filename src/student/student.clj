@@ -1,7 +1,8 @@
 (ns student.student
     (:use clojure.walk)
     (:gen-class))
-  
+ 
+(use 'clojure.stacktrace)    
 ;; Begin Pattern Matching
 ;; ================================================================================
 (def comma
@@ -241,10 +242,10 @@
           action postwalk-replace]
     (some 
         (fn [rule]
-            (println rule)
             (let [result (matcher (first rule) input)]
                 (if (not (= result fail))
-                    (action result (rest rule))))) rules)))
+                    (action result (rest rule))))) rules))
+    (println input))
 
 (pat-match-abbrev '?x* '(?* ?x))
 (pat-match-abbrev '?y* '(?* ?y))
@@ -253,12 +254,18 @@
 
 
 (def basic-student-rules 
-  '(((?x* .)                  ?x)
+  '(
+    ((?x* .)                  ?x)
     ((?x* . ?y*)          (?x ?y))
-    ((?if ?x* (symbol ",") then ?y*)  (?x ?y))
-    ((?if ?x* then ?y*)              (?x ?y))
-    ((?if ?x* (symbol ",") ?y*)       (?x ?y))
+    ;((?if ?x* (symbol ",") then ?y*)  (?x ?y))
+    ;((?if ?x* then ?y*)              (?x ?y))
+    ;((?if ?x* (symbol ",") ?y*)       (?x ?y))
    ; ((?x* (symbol ,) and ?y*)      (?x ?y))
+    ; ((?x* (symbol ",") then ?y*)  (?x ?y))
+    ((if ?x* then ?y*)      (?x ?y))
+    ; ((if ?x* (symbol ",") ?y*)       (?x ?y))
+    ; ((?x* (symbol ",") and ?y*)      (?x ?y))
+>>>>>>> b04dc07b4338bf69e803c7f046bf98e692e357d0
     ((find ?x* and ?y*)     ((= to-find-1 ?x) (= to-find-2 ?y)))
     ((find ?x*)             (= to-find ?x))
     ((?x* equals ?y*)       (= ?x ?y))
@@ -279,13 +286,22 @@
     ((?x* / ?y*)            (/ ?x ?y))
     ((?x* per ?y*)          (/ ?x ?y))
     ((?x* divided by ?y*)   (/ ?x ?y))
-    ((half ?x*)             (/ ?x 2))
-    ((one half ?x*)         (/ ?x 2))
-    ((twice ?x*)            (* 2 ?x))
-    ((square ?x*)           (* ?x ?x))))
+    ;((half ?x*)             (/ ?x 2))
+    ;((one half ?x*)         (/ ?x 2))
+    ;((twice ?x*)            (* 2 ?x))
+    ;((square ?x*)           (* ?x ?x))))
    ; ((?x* % less than ?y*)  (* ?y (/ (- 100 ?x) 100)))
    ; ((?x* % more than ?y*)  (* ?y (/ (+ 100 ?x) 100)))
    ; ((?x* % ?y*)            (* (/ ?x 100) ?y))))
+    ; ((half ?x*)             (/ ?x 2))
+    ; ((one half ?x*)         (/ ?x 2))
+    ; ((twice ?x*)            (* 2 ?x))
+    ((square ?x*)           (* ?x ?x))
+    ; ((?x* % less than ?y*)  (* ?y (/ (- 100 ?x) 100)))
+    ; ((?x* % more than ?y*)  (* ?y (/ (+ 100 ?x) 100)))
+    ; ((?x* % ?y*)            (* (/ ?x 100) ?y))
+    ))
+>>>>>>> b04dc07b4338bf69e803c7f046bf98e692e357d0
 
 
 (def ^:dynamic *student-rules* 
