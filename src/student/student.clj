@@ -252,16 +252,11 @@
                 (if (not (= result fail))
                     (action result (rest rule))))) rules)))
 
-(pat-match-abbrev '?x* '(?* ?x))
-(pat-match-abbrev '?y* '(?* ?y))
+
 ;; Begin Student 
 ;; ================================================================================ 
 
-(defstruct rule  :pattern :response) ; https://clojure.org/reference/data_structures
 
-(defstruct exp (:type list) ; http://hyperpolyglot.org/lisp Definitely not right --> some thing to figure out
-                (:constructor mkexp (left-hand-side operand right-hand-side))
-                operand left-hand-side right-hand-side)
 
 (defn exp-p ; is an expression parameter? --> see book for more
   [x]
@@ -306,13 +301,6 @@
     [expression]
     (symbol? expression))
 
-(defn param-in-expression
-    "Returns true if the parameter is in the
-     expression."
-    [param expression]
-    (or (= param expression)
-            (and (coll? expression))))
-
 (defn commutative-p
   "Is the operation commutative (* + =)?"
   [operand]
@@ -325,6 +313,9 @@
     We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
     [input-words]
     (first input-words))
+
+(pat-match-abbrev '?x* '(?* ?x))
+(pat-match-abbrev '?y* '(?* ?y))
 
 (def basic-student-rules 
   '(((?x* .)                  ?x)
@@ -365,10 +356,81 @@
 (def ^:dynamic *student-rules* 
   (map expand-pat-match-abbrev basic-student-rules))
 
+; STUDENT FUNCTIONS NOT COMPLETED
+; ===================================================================================
+; Figuring out how to represent left and right side of equations ?
+(defstruct exp (:type list) ; http://hyperpolyglot.org/lisp Definitely not right --> some thing to figure out
+  (:constructor mkexp (left-hand-side operand right-hand-side))
+  operand left-hand-side right-hand-side)
 
-(defn translate-to-expression [word]
-  "Translate the problem state in 'words' to and equation of expression"
-  ())
+; Figuring out how to represent our list of options ?
+(defstruct rule  :pattern :response) ; https://clojure.org/reference/data_structures
+
+
+(defn in-exp
+  "Return true if input is within the expression"
+  [x expre])
+
+
+(defn no-unknown-var
+  "Returns true if all variables in expression are now known"
+  [expre])
+
+(defn one-unknown-var
+  "Returns the single unkown expression if only one exists"
+  [expre])
+
+(defn solve-arithmetic
+  "Do the arithmetic for the right hand side
+   This assumes the right hand side is in the
+   correct form"
+   [equation])
+
+(defn binary-expre-p
+  "Is the input expression binary?"
+  [expre])
+
+(defn prefix-to-infix-notation
+  "Translate from prefix to infix notation
+   EX: Infix --> X + Y
+   EX: Prefix --> + X Y"
+   [expre])
+
+(defn print-equation
+  "Format and print the equation so we can
+   see the student work"
+   [header equation])
+
+(defn isolate
+  "Isolate the lone x in e on the left hand side of e
+   Requires many other functions --> probably one of the
+   last functions we will finish."
+   [e x])
+
+(defn solve
+  "Solve a system of equations by constraint propagation"
+  [equation known])
+
+(defn solve-equations
+  "Print the equations and their solution"
+  [equations])
+
+(defn create-list-of-equations
+  "Separate the equations into nested parenthesis"
+  [expre])
+
+(defn translate-pair
+  "Translate the value part of the pair into an equation
+   or an expression"
+  [pair])
+
+(defn translate-to-expression
+  "Translate an English phrase into an equation or expression"
+  [words])
+
+(defn student
+  "Solve certain algebra word problems"
+  [words])
 
   (defn -main
     "I don't do a whole lot ... yet."
