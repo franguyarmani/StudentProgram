@@ -430,12 +430,13 @@
 
  (solve-arithmetic '(= 3 4))
 
-(defn print-equation ; Not working just use printf instead of formatting the bullshit
-"Format and print the equation so we can
- see the student work"
+(defn print-equation
+"Format and print the equation so we can see the student work"
  [header equation]
- (cl-format true "~%~d~{~% ~{ ~a~} ~d~}~%" header
-   (map #'prefix-to-infix-notation equation))) ; Complete prefix-to-infix-notation and this is complete
+ (printf header equations))
+ ;don't think we need anything below this anymore but keeping it just incase.
+ ;(cl-format true "~%~d~{~% ~{ ~a~} ~d~}~%" header
+ ;(map #'prefix-to-infix-notation equation)) ; Complete prefix-to-infix-notation and this is complete
 
 (print-equation "The equation to be solved is" '(* (+ 4 5) 3))
 (cl-format true "~d~{~% ~{ ~a~} ~d~}~%" "The equation to be solved is: " '((+ 3 4)))
