@@ -420,11 +420,12 @@
 "Returns the single unkown expression if only one exists"
 [expre])
 
-(defn solve-arithmetic
+(defn solve-arithmetic ; We may need to add a constructor class to this to have proper formatting
 "Do the arithmetic for the right hand side
  This assumes the right hand side is in the
  correct form"
- [equation])
+ [equation]
+ (get-lhs equation) '= (eval (get-rhs equation)))
 
 (defn print-equation ; Not working just yet
 "Format and print the equation so we can
