@@ -25,6 +25,26 @@
   "Denotes a failure in matching"
   nil)
 
+
+  ; Some required new types
+(defmulti get-lhs class)
+(defmethod get-lhs clojure.lang.PersistentList [expre]
+  (if (> (count expre) 3)
+    fail
+    (second expre)))
+
+(defmulti get-op class)
+(defmethod get-op clojure.lang.PersistentList [expre]
+  (if (> (count expre) 3)
+    fail
+    (first expre)))
+
+(defmulti get-rhs class)
+(defmethod get-rhs clojure.lang.PersistentList [expre]
+  (if (> (count expre) 3)
+    fail
+    (nth expre 2)))
+
 (def no-bindings
   "Denotes successful match with no variable bindings"
   {})
@@ -389,23 +409,7 @@
 ; Figuring out how to represent our list of options ?
 (defstruct rule  :pattern :response) ; https://clojure.org/reference/data_structures
 
-(defmulti get-lhs class)
-(defmethod get-lhs clojure.lang.PersistentList [expre]
-(if (> (count expre) 3)
-  fail
-  (second expre)))
 
-(defmulti get-op class)
-(defmethod get-op clojure.lang.PersistentList [expre]
-(if (> (count expre) 3)
-  fail
-  (first expre)))
-
-(defmulti get-rhs class)
-(defmethod get-rhs clojure.lang.PersistentList [expre]
-(if (> (count expre) 3)
-  fail
-  (nth expre 2)))
 
 (defn in-exp ; Is this equal to contains? --> https://clojuredocs.org/clojure.core/contains_q --> Contains? can't act on lists
 "Return true if input is within the expression"
@@ -419,16 +423,16 @@
   [expre]
   (cond (unknown-parameter ) nil
     (not (seq? expre)) true
-    (no-unknown-var (exp-lhs exp)) (no-unknown-var (exp-rhs exp))
+    (no-unknown-var (get-lhs expre)) (no-unknown-var (get-rhs expre))
     :else nil))
 
 (defn one-unknown-var
 "Returns the single unkown expression if only one exists"
   [expre]
-  (cond (unknown-p exp) nil
+  (cond (unknown-parameter expre) nil
     (not (seq? expre)) nil
-    (no-unknown (exp-lhs exp))(one-unknown (exp-rhs exp))
-    (no-unknown (exp-rhs exp))(one-unknown (exp-rhs exp))
+    (no-unknown-var (get-lhs expre))(one-unknown-var (get-rhs expre))
+    (no-unknown-var (get-rhs expre))(one-unknown-var (get-rhs expre))
     :else nil))
 
 (defn solve-arithmetic ; We may need to add a constructor class to this to have proper formatting
@@ -438,17 +442,15 @@
  [equation]
  (get-lhs equation) '= (eval (get-rhs equation)))
 
- (solve-arithmetic '(= 3 4))
-
 (defn print-equation ; Not working just use printf instead of formatting the bullshit
 "Format and print the equation so we can
  see the student work"
  [header equation]
- (cl-format true "~%~d~{~% ~{ ~a~} ~d~}~%" header
+ (cl-format true "~%~d~{~%  ~a ~d~}~%" header
    (map #'prefix-to-infix-notation equation))) ; Complete prefix-to-infix-notation and this is complete
 
-(print-equation "The equation to be solved is" '(* (+ 4 5) 3))
-(cl-format true "~d~{~% ~{ ~a~} ~d~}~%" "The equation to be solved is: " '((+ 3 4)))
+;(print-equation "The equation to be solved is" '(* (+ 4 5) 3))
+;(cl-format true "~d~{~% ~{ ~a~} ~d~}~%" "The equation to be solved is: " '((+ 3 4)))
 
 (defn isolate
 "Isolate the lone x in e on the left hand side of e
