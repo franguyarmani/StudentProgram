@@ -306,8 +306,14 @@
 
 (defn unknown-parameter ;
   "Is the argument an unknown variable?"
-  [expression]
-  (symbol? expression))
+  [expre]
+  (cond 
+    (= expre nil) true
+    (symbol? expre) true
+    (keyword? expre) true
+    (= '() expre) true
+    :else false
+    ))
 
 (defn commutative-p
 "Is the operation commutative (* + =)?"
@@ -395,23 +401,6 @@
 
 (defmulti get-lhs class)
 (defmethod get-lhs clojure.lang.PersistentList [expre]
-<<<<<<< HEAD
-  (if (> (count expre) 3)
-    fail
-    (second expre)))
-
-(defmulti get-op class)
-(defmethod get-op clojure.lang.PersistentList [expre] 
-  (if (> (count expre) 3)
-    fail
-    (first expre)))
-  
-(defmulti get-rhs class)
-(defmethod get-rhs clojure.lang.PersistentList [expre] 
-  (if (> (count expre) 3)
-    fail
-    (nth expre 2)))
-=======
 (if (> (count expre) 3)
   fail
   (second expre)))
@@ -427,7 +416,6 @@
 (if (> (count expre) 3)
   fail
   (nth expre 2)))
->>>>>>> francis
 
 (defn in-exp ; Is this equal to contains? --> https://clojuredocs.org/clojure.core/contains_q --> Contains? can't act on lists
 "Return true if input is within the expression"
