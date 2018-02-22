@@ -1,7 +1,7 @@
 (ns student.student
   (:use clojure.walk)
   (:use clojure.pprint) ; common lisp formatting
-  (:use clojure.stacktrace) 
+  (:use clojure.stacktrace)
   (:gen-class))
 
 ;; Begin Pattern Matching
@@ -210,7 +210,7 @@
                                                bindings))
          :else fail)))
 
-         
+
 ;; Rule based translator
 ;; ================================================================================
 (defn call-arg-on-remaining-args ; funcall
@@ -219,14 +219,14 @@
   [arg & remaining-args]
    (apply arg remaining-args))
 
-(defn reject-empty-list ; consp in common-lisp 
+(defn reject-empty-list ; consp in common-lisp
     "Only accept a list if it isn't empty"
     [object]
     (and (list? object) (not (empty? object))))
 
 (defn append-to ; For use in create-list-of-equations DOUBLE CHECK
 "Append all values to a list and sort it
- (append-to '(1 2 3) '() '(4 5 6) '1) --> (1 1 2 3 4 5 6)" 
+ (append-to '(1 2 3) '() '(4 5 6) '1) --> (1 1 2 3 4 5 6)"
 [& input]
 (sort (flatten (conj input))))
 
@@ -253,7 +253,7 @@
   [input rules & keys ]
   (let [matcher pat-match
         action postwalk-replace]
-  (some 
+  (some
       (fn [rule]
           (println rule)
           (let [result (matcher (first rule) input)]
@@ -261,8 +261,8 @@
                   (action result (rest rule))))) rules)))
 
 
-;; Begin Student 
-;; ================================================================================ 
+;; Begin Student
+;; ================================================================================
 
 
 
@@ -270,16 +270,16 @@
 [x]
 (reject-empty-list x))
 
-(defn exp-args ; rest of expression arguments 
+(defn exp-args ; rest of expression arguments
 [x]          ; --> exp-p and exp-args will be used in conjuction
 (rest x))
 
 (defn make-expression
-  "Turn 1 + 2 into + 1 2" 
+  "Turn 1 + 2 into + 1 2"
   [exp] ; method for taking it from a list
   (list (second exp) (first exp) (nth exp 2)))
 
-  (comment 
+  (comment
 (defn make-expression ; Are we going to be taking this from the student list of rules '(1 + 2) or will it be 3 vars? (1 + 2)
 [lhs op rhs]
 (conj '() (quote (symbol op) lhs rhs)))) ; Method for taking it from three vars -- Couldn't figure this out
@@ -299,15 +299,21 @@
   [operation ops-inverse]
   (let [inverse-poss ops-inverse]
     (println inverse-poss)
-    (if (= (ffirst inverse-poss)) operation) 
+    (if (= (ffirst inverse-poss)) operation)
       (first (second inverse-poss))
-    (if (not (= (ffirst inverse-poss) operation)) 
+    (if (not (= (ffirst inverse-poss) operation))
       (return-inverse-operation operation (rest inverse-poss) ) (second (first inverse-poss)))))
 
 (defn unknown-parameter ;
   "Is the argument an unknown variable?"
-  [expression]
-  (symbol? expression))
+  [expre]
+  (cond 
+    (= expre nil) true
+    (symbol? expre) true
+    (keyword? expre) true
+    (= '() expre) true
+    :else false
+    ))
 
 (defn commutative-p
 "Is the operation commutative (* + =)?"
@@ -315,12 +321,21 @@
 (contains? operand '(+ = *)))
 
 (defn make-var-for-word
+<<<<<<< HEAD
+  "Will make a variable given a word (ex: Tom has 3 assignments and 2 days to do it. Will he have enough days?
+    Word = Assignment = 3
+    Word = days = 2
+    We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
+    [input-words]
+    (first input-words))
+=======
 "Will make a variable given a word (ex: Tom has 3 assignments and 2 days to do it. Will he have enough days?
   Word = Assignment = 3
   Word = days = 2
   We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
   [input-words]
-  (first input-words)))
+  (first input-words))
+>>>>>>> francis
 
 (defn binary-expre-p
     "Is the input expression binary?"
@@ -333,18 +348,15 @@
        EX: Prefix --> + X Y"
        [expre & all-elem-test]
        (if (not (seq? expre)) expre ; works
-           (map #'prefix-to-infix-notation 
+           (map #'prefix-to-infix-notation
             (if (binary-expre-p expre)
               (list (get-lhs expre) (get-op expre) (get-rhs expre)) expre)))) ; We need to create a left hand side and right hand side representation
                         ; the expression.
 
-                        (prefix-to-infix-notation '(+ 1 (+ 3 4) 5))
-                        (map prefix-to-infix-notation (if (binary-expre-p expre) '()))
-
 (pat-match-abbrev '?x* '(?* ?x))
 (pat-match-abbrev '?y* '(?* ?y))
 
-(def basic-student-rules 
+(def basic-student-rules
 '(((?x* .)                            ?x)
   ((?x* . ?y*)                   (?x ?y))
   ((?if ?x* (symbol ",") then ?y*)  (?x ?y))
@@ -394,17 +406,16 @@
   (second expre)))
 
 (defmulti get-op class)
-(defmethod get-op clojure.lang.PersistentList [expre] 
+(defmethod get-op clojure.lang.PersistentList [expre]
 (if (> (count expre) 3)
   fail
   (first expre)))
 
 (defmulti get-rhs class)
-(defmethod get-rhs clojure.lang.PersistentList [expre] 
+(defmethod get-rhs clojure.lang.PersistentList [expre]
 (if (> (count expre) 3)
   fail
   (nth expre 2)))
-
 
 (defn in-exp ; Is this equal to contains? --> https://clojuredocs.org/clojure.core/contains_q --> Contains? can't act on lists
 "Return true if input is within the expression"
@@ -415,11 +426,19 @@
 
 (defn no-unknown-var
 "Returns true if all variables in expression are now known"
-[expre])
+  [expre]
+  (cond (unknown-parameter ) nil
+    (not (seq? expre)) true
+    (no-unknown-var (exp-lhs exp)) (no-unknown-var (exp-rhs exp))
+    :else nil))
 
 (defn one-unknown-var
 "Returns the single unkown expression if only one exists"
-[expre])
+  [expre]
+  (cond (unknown-p exp) nil
+    (not (seq? expre)) nil
+    (no-unknown (exp-lhs exp))(one-unknown (exp-rhs exp)))
+    )
 
 (defn solve-arithmetic ; We may need to add a constructor class to this to have proper formatting
 "Do the arithmetic for the right hand side
@@ -445,7 +464,30 @@
 "Isolate the lone x in e on the left hand side of e
  Requires many other functions --> probably one of the
  last functions we will finish."
- [e x])
+ [e x]
+  (cond
+    ; First case
+    (= (get-lhs e) x) e
+    ; Second case
+    (in-exp x (get-lhs e) (isolate (list (get-rhs e) '= (get-lhs e)) x))
+    ; Third case
+    (isolate (list (get-lhs (get-lhs e)) '=
+                   (list (get-rhs e)
+                         (return-inverse-operation (get-op (get-lhs e)))
+                         (get-rhs (get-lhs e))))) x
+    ; Fourth case
+    (commutative-p (get-op (get-lhs e)))
+    (isolate (list (get-rhs (get-lhs e)) '= (list (get-rhs e)
+                                                  (return-inverse-operation
+                                                          (get-op (get-lhs e)))
+                                                  (get-rhs (get-lhs e))))) x
+    ; Fifth case
+    (true
+          (isolate (list (get-rhs (get-lhs e)) '= (list (get-lhs (get-lhs e))
+                                                        (get-op (get-lhs e))
+                                                        (get-rhs e))) x))))
+
+
 
 (defn solve
 "Solve a system of equations by constraint propagation"
@@ -454,7 +496,7 @@
   (some (fn [equation]
     (let [x (one-unknown-var equation)]
             (when x
-              (let [answer  (solve-arithmetic 
+              (let [answer  (solve-arithmetic
                             (isolate equation x))]
               (solve (postwalk-replace {(:lhs answer) (:rhs answer)}
                                         ; idk if the line below this is right, we'll see.
@@ -482,7 +524,7 @@
         (postwalk-replace (into {} ; use this for an atom??
           (map (fn [[var bindings]] [var (translate-to-expression bindings)]) bindings))
         (responses)))
-  (make-var-for-word value-pair)))) 
+  (make-var-for-word value-pair))))
 
 (translate-to-expression '(difference between ?x and ?y))
 
