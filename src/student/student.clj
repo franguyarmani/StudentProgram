@@ -472,8 +472,9 @@
     (let [x (one-unknown-var equation)]
             (when x
               (let [answer  (solve-arithmetic
-                            (isolate equation x))]
-              (solve (postwalk-replace {(:lhs answer) (:rhs answer)}
+                            (isolate equation x))
+                    action postwalk-replace]
+              (solve (action (get-lhs answer) (get-rhs answer))
                                         ; idk if the line below this is right, we'll see.
                                         (remove (partial = equation) equations))
                       (cons answer known))))))
@@ -492,8 +493,6 @@
     (if (not? (seq? (first expre))) (list expre))
     (true (append-to (create-list-of-equations (first expre))
                      (create-list-of-equations (rest expre))))))
-
-  )
 
 (declare translate-to-expression)
 
