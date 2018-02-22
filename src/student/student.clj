@@ -306,14 +306,8 @@
 
 (defn unknown-parameter ;
   "Is the argument an unknown variable?"
-  [expre]
-  (cond 
-    (= expre nil) true
-    (symbol? expre) true
-    (keyword? expre) true
-    (= '() expre) true
-    :else false
-    ))
+  [expression]
+  (symbol? expression))
 
 (defn commutative-p
 "Is the operation commutative (* + =)?"
@@ -321,21 +315,12 @@
 (contains? operand '(+ = *)))
 
 (defn make-var-for-word
-<<<<<<< HEAD
-  "Will make a variable given a word (ex: Tom has 3 assignments and 2 days to do it. Will he have enough days?
-    Word = Assignment = 3
-    Word = days = 2
-    We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
-    [input-words]
-    (first input-words))
-=======
 "Will make a variable given a word (ex: Tom has 3 assignments and 2 days to do it. Will he have enough days?
   Word = Assignment = 3
   Word = days = 2
   We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
   [input-words]
   (first input-words))
->>>>>>> francis
 
 (defn binary-expre-p
     "Is the input expression binary?"
@@ -426,19 +411,11 @@
 
 (defn no-unknown-var
 "Returns true if all variables in expression are now known"
-  [expre]
-  (cond (unknown-parameter ) nil
-    (not (seq? expre)) true
-    (no-unknown-var (exp-lhs exp)) (no-unknown-var (exp-rhs exp))
-    :else nil))
+[expre])
 
 (defn one-unknown-var
 "Returns the single unkown expression if only one exists"
-  [expre]
-  (cond (unknown-p exp) nil
-    (not (seq? expre)) nil
-    (no-unknown (exp-lhs exp))(one-unknown (exp-rhs exp)))
-    )
+[expre])
 
 (defn solve-arithmetic ; We may need to add a constructor class to this to have proper formatting
 "Do the arithmetic for the right hand side
@@ -449,13 +426,12 @@
 
  (solve-arithmetic '(= 3 4))
 
-(defn print-equation
-"Format and print the equation so we can see the student work"
+(defn print-equation ; Not working just use printf instead of formatting the bullshit
+"Format and print the equation so we can
+ see the student work"
  [header equation]
- (printf header equations))
- ;don't think we need anything below this anymore but keeping it just incase.
- ;(cl-format true "~%~d~{~% ~{ ~a~} ~d~}~%" header
- ;(map #'prefix-to-infix-notation equation)) ; Complete prefix-to-infix-notation and this is complete
+ (cl-format true "~%~d~{~% ~{ ~a~} ~d~}~%" header
+   (map #'prefix-to-infix-notation equation))) ; Complete prefix-to-infix-notation and this is complete
 
 (print-equation "The equation to be solved is" '(* (+ 4 5) 3))
 (cl-format true "~d~{~% ~{ ~a~} ~d~}~%" "The equation to be solved is: " '((+ 3 4)))
@@ -488,7 +464,6 @@
                                                         (get-rhs e))) x))))
 
 
-
 (defn solve
 "Solve a system of equations by constraint propagation"
 [equation known]
@@ -506,14 +481,19 @@
   known))
 
 (defn solve-equations
-  "Print the equations and their solution"
-  [equations]
-  (print-equations "The equations to be solved are: " equations)
-  (print-equations "The soluction is: " (solve equations nil)))
+"Print the equations and their solution"
+[equations])
 
 (defn create-list-of-equations
 "Separate the equations into nested parenthesis"
-[expre])
+[expre]
+  (cond
+    (if (nil? expre) fail)
+    (if (not? (seq? (first expre))) (list expre))
+    (true (append-to (create-list-of-equations (first expre))
+                     (create-list-of-equations (rest expre))))))
+
+  )
 
 (declare translate-to-expression)
 
