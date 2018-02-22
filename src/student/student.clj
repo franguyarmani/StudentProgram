@@ -449,7 +449,8 @@
   [expre]
   (cond (unknown-p exp) nil
     (not (seq? expre)) nil
-    (no-unknown (exp-lhs exp))(one-unknown (exp-rhs exp)))
+    (no-unknown (exp-lhs exp))(one-unknown (exp-rhs exp))
+    ())
     )
 
 (defn solve-arithmetic ; We may need to add a constructor class to this to have proper formatting
