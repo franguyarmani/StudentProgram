@@ -44,5 +44,15 @@
   (cond (unknown-p exp) nil
     (not (seq? expre)) nil
     (no-unknown (exp-lhs exp))(one-unknown (exp-rhs exp))
-    (no-unknown (exp-rhs exp))(one-unknown (exp-lhs exp))
+    (no-unknown (exp-rhs exp))(one-unknown (exp-rhs exp))
+    :else nil))
+
+(defn unknown-parameter ;
+  "Is the argument an unknown variable?"
+  [expre]
+  (cond 
+    (= expre nil) true
+    (symbol? expre) true
+    (keyword? expre) true
+    (= '() expre) true
     :else nil))

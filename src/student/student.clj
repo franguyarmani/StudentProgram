@@ -306,8 +306,13 @@
 
 (defn unknown-parameter ;
   "Is the argument an unknown variable?"
-  [expression]
-  (symbol? expression))
+  [expre]
+  (cond 
+    (= expre nil) true
+    (symbol? expre) true
+    (keyword? expre) true
+    (= '() expre) true
+    :else nil))
 
 (defn commutative-p
 "Is the operation commutative (* + =)?"
@@ -411,7 +416,11 @@
 
 (defn no-unknown-var
 "Returns true if all variables in expression are now known"
-[expre])
+  [expre]
+  (cond (unknown-parameter ) nil
+    (not (seq? expre)) true
+    (no-unknown-var (exp-lhs exp)) (no-unknown-var (exp-rhs exp))
+    :else nil))
 
 (defn one-unknown-var
 "Returns the single unkown expression if only one exists"
@@ -419,8 +428,8 @@
   (cond (unknown-p exp) nil
     (not (seq? expre)) nil
     (no-unknown (exp-lhs exp))(one-unknown (exp-rhs exp))
-    ())
-    )
+    (no-unknown (exp-rhs exp))(one-unknown (exp-rhs exp))
+    :else nil))
 
 (defn solve-arithmetic ; We may need to add a constructor class to this to have proper formatting
 "Do the arithmetic for the right hand side
