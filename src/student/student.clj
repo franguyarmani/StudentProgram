@@ -447,17 +447,17 @@
 "Solve a system of equations by constraint propagation"
 [equation known]
   (or
-   (some (fn [equation]
-           (let [x (one-unknown-var equation)]
-             (when x
-               (let [answer (solve-arithmetic 
-                            (isolate equation x))]
-                 (solve (postwalk-replace {(:lhs answer) (:rhs answer)}
+    (some (fn [equation]
+      (let [x (one-unknown-var equation)]
+              (when x
+                (let [answer  (solve-arithmetic 
+                              (isolate equation x))]
+                (solve (postwalk-replace {(:lhs answer) (:rhs answer)}
                                           ; idk if the line below this is right, we'll see.
                                           (remove (partial = equation) equations))
                         (cons answer known))))))
-         equations)
-   known))
+          equations)
+    known))
 
 (defn solve-equations
 "Print the equations and their solution"
