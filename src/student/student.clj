@@ -427,7 +427,9 @@
  [equation]
  (get-lhs equation) '= (eval (get-rhs equation)))
 
-(defn print-equation ; Not working just yet
+ (solve-arithmetic '(= 3 4))
+
+(defn print-equation ; Not working just use printf instead of formatting the bullshit
 "Format and print the equation so we can
  see the student work"
  [header equation]
@@ -455,14 +457,19 @@
 "Separate the equations into nested parenthesis"
 [expre])
 
-(defn translate-pair
+(declare translate-to-expression)
+
+(defn translate-pair ; use next or rest? we want to get the other expressions in this
 "Translate the value part of the pair into an equation
  or an expression"
-[pair])
+[value-pair]
+  (cons (rest value-pair) ; This will be adding the translation to our list
+        (translate-to-expression (rest value-pair))))  ; This will be recursively looking for the translation
 
 (defn translate-to-expression
 "Translate an English phrase into an equation or expression"
-[words])
+[value-pair] ; use re
+)
 
 (defn student
 "Solve certain algebra word problems"
