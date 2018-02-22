@@ -481,8 +481,10 @@
   known))
 
 (defn solve-equations
-"Print the equations and their solution"
-[equations])
+  "Print the equations and their solution"
+  [equations]
+  (print-equations "The equations to be solved are: " equations)
+  (print-equations "The soluction is: " (solve equations nil)))
 
 (defn create-list-of-equations
 "Separate the equations into nested parenthesis"
