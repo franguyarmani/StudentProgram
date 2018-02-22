@@ -44,4 +44,5 @@
   (cond (unknown-p exp) nil
     (not (seq? expre)) nil
     (no-unknown (exp-lhs exp))(one-unknown (exp-rhs exp))
-    (no-unknown (exp-rhs exp))(one-unknown (exp-rhs exp))))
+    (no-unknown (exp-rhs exp))(one-unknown (exp-lhs exp))
+    :else nil))
