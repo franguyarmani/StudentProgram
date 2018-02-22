@@ -402,12 +402,6 @@
   fail
   (nth expre 2)))
 
-(defn constructor
-  "Return construct or lhs and rhs stuff"
-  [input-list]
-  (list (get-lhs input-list)  (get-op input-list) (get-rhs input-list)))
-
-
 (defn in-exp ; Is this equal to contains? --> https://clojuredocs.org/clojure.core/contains_q --> Contains? can't act on lists
 "Return true if input is within the expression"
 [x expre]
@@ -468,6 +462,8 @@
           (isolate (list (get-rhs (get-lhs e)) '= (list (get-lhs (get-lhs e))
                                                         (get-op (get-lhs e))
                                                         (get-rhs e))) x))))
+
+
 
 (defn solve
 "Solve a system of equations by constraint propagation"
