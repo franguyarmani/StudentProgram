@@ -493,7 +493,7 @@
                                         (remove (partial = equation) equations))
                       (cons answer known))))))
         equations)
-  known))
+  known)
 
 (defn solve-equations
 "Print the equations and their solution"
