@@ -338,8 +338,9 @@
               (list (get-lhs expre) (get-op expre) (get-rhs expre)) expre)))) ; We need to create a left hand side and right hand side representation
                         ; the expression.
 
-(prefix-to-infix-notation '(+ 1 (+ 3 4) 5))
-(map prefix-to-infix-notation (if (binary-expre-p expre) '()))
+                        (prefix-to-infix-notation '(+ 1 (+ 3 4) 5))
+                        (map prefix-to-infix-notation (if (binary-expre-p expre) '()))
+
 (pat-match-abbrev '?x* '(?* ?x))
 (pat-match-abbrev '?y* '(?* ?y))
 
@@ -448,18 +449,18 @@
 (defn solve
 "Solve a system of equations by constraint propagation"
 [equation known]
-  (or
-    (some (fn [equation]
-      (let [x (one-unknown-var equation)]
-              (when x
-                (let [answer  (solve-arithmetic 
-                              (isolate equation x))]
-                (solve (postwalk-replace {(:lhs answer) (:rhs answer)}
-                                          ; idk if the line below this is right, we'll see.
-                                          (remove (partial = equation) equations))
-                        (cons answer known))))))
-          equations)
-    known))
+(or
+  (some (fn [equation]
+    (let [x (one-unknown-var equation)]
+            (when x
+              (let [answer  (solve-arithmetic 
+                            (isolate equation x))]
+              (solve (postwalk-replace {(:lhs answer) (:rhs answer)}
+                                        ; idk if the line below this is right, we'll see.
+                                        (remove (partial = equation) equations))
+                      (cons answer known))))))
+        equations)
+  known))
 
 (defn solve-equations
 "Print the equations and their solution"
@@ -471,17 +472,16 @@
 
 (declare translate-to-expression)
 
-(defn translate-pair ; use next or rest? we want to get the other expressions in this
-"Translate the value part of the pair into an equation
- or an expression"
-[value-pair]
-  (cons (rest value-pair) ; This will be adding the translation to our list
-        (translate-to-expression (rest value-pair))))  ; This will be recursively looking for the translation
+(defn translate-to-expression ; rule based translator takes input rule & keys
+  "Translate an English phrase into an equation or expression"
+  [value-pair] ; use re
+  (or (rule-based-translator value-pair basic-student-rules :action (fn [bindings responses]
+        (postwalk-replace (into {} ; use this for an atom??
+          (map (fn [[var bindings]] [var (translate-to-expression bindings)]) bindings))
+        (responses)))
+  (make-var-for-word value-pair)))) 
 
-(defn translate-to-expression
-"Translate an English phrase into an equation or expression"
-[value-pair] ; use re
-)
+(translate-to-expression '(difference between ?x and ?y))
 
 (defn student
 "Solve certain algebra word problems"
