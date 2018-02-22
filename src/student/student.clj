@@ -307,7 +307,7 @@
 (defn unknown-parameter ;
   "Is the argument an unknown variable?"
   [expre]
-  (cond 
+  (cond
     (= expre nil) true
     (symbol? expre) true
     (keyword? expre) true
@@ -497,7 +497,9 @@
 
 (defn solve-equations
 "Print the equations and their solution"
-[equations])
+[equations]
+  (print-equation "The equations I am currently solving are: " equations)
+  (print-equation "The solution is: " (solve equations nil)))
 
 (defn create-list-of-equations
 "Separate the equations into nested parenthesis"
@@ -523,7 +525,11 @@
 
 (defn student
 "Solve certain algebra word problems"
-[words])
+[words]
+  (solve-equations
+    (create-list-of-equations
+      (translate-to-expression
+        (remove #'noise-word-p words)))))
 
 (defn -main
   "I don't do a whole lot ... yet."
