@@ -320,21 +320,12 @@
 (contains? operand '(+ = *)))
 
 (defn make-var-for-word
-<<<<<<< HEAD
   "Will make a variable given a word (ex: Tom has 3 assignments and 2 days to do it. Will he have enough days?
     Word = Assignment = 3
     Word = days = 2
     We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
     [input-words]
     (first input-words))
-=======
-"Will make a variable given a word (ex: Tom has 3 assignments and 2 days to do it. Will he have enough days?
-  Word = Assignment = 3
-  Word = days = 2
-  We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
-  [input-words]
-  (first input-words)))
->>>>>>> francis
 
 (defn binary-expre-p
     "Is the input expression binary?"
@@ -403,7 +394,6 @@
 
 (defmulti get-lhs class)
 (defmethod get-lhs clojure.lang.PersistentList [expre]
-<<<<<<< HEAD
   (if (> (count expre) 3)
     fail
     (second expre)))
@@ -420,25 +410,6 @@
     fail
     (nth expre 2)))
 
-=======
-(if (> (count expre) 3)
-  fail
-  (second expre)))
->>>>>>> francis
-
-(defmulti get-op class)
-(defmethod get-op clojure.lang.PersistentList [expre] 
-(if (> (count expre) 3)
-  fail
-  (first expre)))
-
-(defmulti get-rhs class)
-(defmethod get-rhs clojure.lang.PersistentList [expre] 
-(if (> (count expre) 3)
-  fail
-  (nth expre 2)))
-
-
 (defn in-exp ; Is this equal to contains? --> https://clojuredocs.org/clojure.core/contains_q --> Contains? can't act on lists
 "Return true if input is within the expression"
 [x expre]
@@ -448,11 +419,19 @@
 
 (defn no-unknown-var
 "Returns true if all variables in expression are now known"
-[expre])
+  [expre]
+  (cond (unknown-parameter ) nil
+    (not (seq? expre)) true
+    (no-unknown-var (exp-lhs exp)) (no-unknown-var (exp-rhs exp))
+    :else nil))
 
 (defn one-unknown-var
 "Returns the single unkown expression if only one exists"
-[expre])
+  [expre]
+  (cond (unknown-p exp) nil
+    (not (seq? expre)) nil
+    (no-unknown (exp-lhs exp))(one-unknown (exp-rhs exp)))
+    )
 
 (defn solve-arithmetic ; We may need to add a constructor class to this to have proper formatting
 "Do the arithmetic for the right hand side
