@@ -415,7 +415,12 @@
 
 (defn one-unknown-var
 "Returns the single unkown expression if only one exists"
-[expre])
+  [expre]
+  (cond (unknown-p exp) nil
+    (not (seq? expre)) nil
+    (no-unknown (exp-lhs exp))(one-unknown (exp-rhs exp))
+    ())
+    )
 
 (defn solve-arithmetic ; We may need to add a constructor class to this to have proper formatting
 "Do the arithmetic for the right hand side

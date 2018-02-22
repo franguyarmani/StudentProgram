@@ -28,3 +28,21 @@
 
 (defn construct [lst]
     (Exp. (second lst) (first lst) (nth lst 2)))
+
+;----------
+(defn no-unknown-var
+"Returns true if all variables in expression are now known"
+  [expre]
+  (cond (unknown-parameter ) nil
+    (not (seq? expre)) true
+    (no-unknown-var (exp-lhs exp)) (no-unknown-var (exp-rhs exp))
+    :else nil))
+
+(defn one-unknown-var
+"Returns the single unkown expression if only one exists"
+  [expre]
+  (cond (unknown-p exp) nil
+    (not (seq? expre)) nil
+    (no-unknown (exp-lhs exp))(one-unknown (exp-rhs exp))
+    (no-unknown (exp-rhs exp))(one-unknown (exp-lhs exp))
+    :else nil))
