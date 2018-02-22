@@ -424,15 +424,15 @@
  correct form"
  [equation])
 
-(defn print-equation
+(defn print-equation ; Not working just yet
 "Format and print the equation so we can
  see the student work"
  [header equation]
- (cl-format true "~%~a~{~%   ~a~}~}~%" header
+ (cl-format true "~%~a~{~%  ~{ ~a~}~}~%" header
    (map #'prefix-to-infix-notation equation))) ; Complete prefix-to-infix-notation and this is complete
 
 (print-equation "The equation to be solved is" '(* (+ 4 5) 3))
-
+(cl-format true "~a~{~%  ~}~%" "hello: " '(+ 3 4))
 
 (defn isolate
 "Isolate the lone x in e on the left hand side of e
