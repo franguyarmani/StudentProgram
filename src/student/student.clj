@@ -306,9 +306,14 @@
 
 (defn unknown-parameter ;
     "Is the argument an unknown variable?"
-    [expression]
-    (symbol? expression))
+    [expre]
+    (cond (symbol? expre) true
+      (= nil expre) true
+      (= '() expre)
+      (keyword? expre) true
+      :else false))
 
+    
 (defn commutative-p
   "Is the operation commutative (* + =)?"
   [operand]
@@ -320,7 +325,7 @@
     Word = days = 2
     We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
     [input-words]
-    (first input-words)))
+    (first input-words))
 
 (defn binary-expre-p
       "Is the input expression binary?"
@@ -383,6 +388,24 @@
 
 ; Figuring out how to represent our list of options ?
 (defstruct rule  :pattern :response) ; https://clojure.org/reference/data_structures
+
+(defmulti get-lhs class)
+(defmethod get-lhs clojure.lang.PersistentList [expre]
+  (if (> (count expre) 3)
+    fail
+    (second expre)))
+
+(defmulti get-op class)
+(defmethod get-op clojure.lang.PersistentList [expre] 
+  (if (> (count expre) 3)
+    fail
+    (first expre)))
+  
+(defmulti get-rhs class)
+(defmethod get-rhs clojure.lang.PersistentList [expre] 
+  (if (> (count expre) 3)
+    fail
+    (nth expre 2)))
 
 
 (defn in-exp
