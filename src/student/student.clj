@@ -188,7 +188,7 @@
 (defn single-pattern?
   "Is this a single-matching pattern?"
   [pattern]
-  (and (list? pattern) (get single-matcher-table (first pattern))))
+  (and (seq? pattern) (get single-matcher-table (first pattern))))
 
 (defn single-matcher
   "Call the right single-pattern matching function."
@@ -198,8 +198,8 @@
 (defn segment-pattern?
   "Is this a segment-matching pattern?"
   [pattern]
-  (and (list? pattern)
-       (list? (first pattern))
+  (and (seq? pattern)
+       (seq? (first pattern))
        (symbol? (first (first pattern)))
        (get segment-matcher-table (first (first pattern)))))
 
@@ -216,17 +216,18 @@
 (defn pat-match
   ([pattern input] (pat-match pattern input no-bindings))
   ([pattern input bindings]
+  (do
+   (println "Entering pat match" pattern input bindings)
    (cond
-     (= bindings fail) fail
+     (= bindings fail) (do (println "eq bindings fail") fail)
      (variable? pattern) (match-variable pattern input bindings)
      (= pattern input) bindings
      (single-pattern? pattern) (single-matcher pattern input bindings)
-     ;
      (segment-pattern? pattern) (segment-matcher pattern input bindings)
-     (and (list? pattern) (list? input))
+     (and (seq? pattern) (seq? input))
           (pat-match (rest pattern) (rest input)
               (pat-match (first pattern) (first input) bindings))
-         :else fail)))
+         :else fail))))
 
 ; pat-match does not pass the following
 ;(def axyd (expand-pat-match-abbrev '(a ?x* ?y* d)))
@@ -261,7 +262,7 @@
   "Expand all pattern matching abbreviations in pat"
   [pat]
   (cond
-      (symbol? pat) (get @abbreviation-table pat pat)
+      (unknown-parameter pat)(get @abbreviation-table pat pat)
       (empty? pat) pat
           :else (cons (expand-pat-match-abbrev (first pat))
                       (expand-pat-match-abbrev (rest pat)))))
