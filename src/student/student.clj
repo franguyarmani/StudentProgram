@@ -505,10 +505,9 @@
 "Separate the equations into nested parenthesis"
 [expre]
   (cond
-    (if (nil? expre) fail
-    (if (not (seq? (first expre))) (seq expre)
-    (append-to (create-list-of-equations (first expre))
-                     (create-list-of-equations (rest expre)))))))
+    (nil? expre) fail
+    (not (seq? (first expre))) (seq expre)
+    :else (append-to (create-list-of-equations (first expre))(create-list-of-equations (rest expre)))))
 
 (declare translate-to-expression)
 
