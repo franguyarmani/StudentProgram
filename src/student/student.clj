@@ -269,21 +269,20 @@
 
 (defn rule-based-translator
   "Apply a set of rules"
-  [input rules & keys ]
+  [input rules & keys]
   (let [matcher pat-match
         action postwalk-replace]
   (some
       (fn [rule]
-          (let [result (matcher (first rule) input)]
+          (let [result (call-arg-on-remaining-args matcher
+                       (call-arg-on-remaining-args #'first rule) input)]
               (if (not (= result fail))
-                  (action result (rest rule))))) rules)))
+                  (call-arg-on-remaining-args action result
+                      (call-arg-on-remaining-args #'rest rule))))) rules)))
 
 
 ;; Begin Student
 ;; ================================================================================
-
-
-
 (defn exp-p ; is an expression parameter? --> see book for more
 [x]
 (reject-empty-list x))
@@ -504,23 +503,29 @@
 (defn create-list-of-equations
 "Separate the equations into nested parenthesis"
 [expre]
-  (cond
-    (nil? expre) fail
-    (not (seq? (first expre))) (list expre)
-    :else
+;  (cond
+    (if (nil? expre) fail
+    (if (not (seq? (first expre))) (list expre)
     (append-to (create-list-of-equations (first expre))
-                     (create-list-of-equations (rest expre)))))
+                     (create-list-of-equations (rest expre))))))
 
 (declare translate-to-expression)
+
+(defn translate-pair
+  [value-pair]
+  (cons (rest value-pair)
+        (translate-to-expression (rest value-pair))))
 
 (defn translate-to-expression ; rule based translator takes input rule & keys rule-if rule-then (first and rest) ;rule response sublis
   "Translate an English phrase into an equation or expression"
   [value-pair] ; use re
-  (or (rule-based-translator value-pair basic-student-rules :action (fn [bindings responses]
-        (postwalk-replace (into {} ; use this for an atom??
-          (map (fn [[var bindings]] [var (translate-to-expression bindings)]) bindings))
-        (responses)))
-  (make-var-for-word value-pair))))
+  (let [ action postwalk-replace ]
+  (or (rule-based-translator value-pair basic-student-rules
+          (fn [bindings response]
+            (println bindings)
+            (println response)
+            (action (map #'translate-pair bindings) response)))
+      (make-var-for-word value-pair))))
 
 ;(translate-to-expression '(difference between ?x and ?y))
 
