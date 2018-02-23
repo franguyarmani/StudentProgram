@@ -272,6 +272,7 @@
   [input rules & keys]
   (let [matcher pat-match
         action postwalk-replace]
+    (println keys)
   (some
       (fn [rule]
           (let [result (call-arg-on-remaining-args matcher
