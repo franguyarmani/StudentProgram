@@ -215,7 +215,6 @@
 (defn pat-match
   ([pattern input] (pat-match pattern input no-bindings))
   ([pattern input bindings]
-      (println pattern)
    (cond (= bindings fail) fail
          (variable? pattern) (match-variable pattern input bindings)
          (= pattern input) bindings
@@ -275,7 +274,6 @@
         action postwalk-replace]
   (some
       (fn [rule]
-          (println rule)
           (let [result (matcher (first rule) input)]
               (if (not (= result fail))
                   (action result (rest rule))))) rules)))
@@ -304,11 +302,11 @@
 [lhs op rhs]
 (conj '() (quote (symbol op) lhs rhs)))) ; Method for taking it from three vars -- Couldn't figure this out
 
-
 (defn noise-word-p ; CHECK according to the book
 "A word we don't really care about"
 [word]
-(contains? word '(a an the this number of $)))
+('#{a an the this number of $} word))
+
 
 (def operators-and-their-inverses
   "Helper variables for return-inverse-operation"
@@ -318,7 +316,6 @@
   "Return the inverse operation"
   [operation ops-inverse]
   (let [inverse-poss ops-inverse]
-    (println inverse-poss)
     (if (= (ffirst inverse-poss)) operation)
       (first (second inverse-poss))
     (if (not (= (ffirst inverse-poss) operation))
@@ -477,7 +474,8 @@
     (true
           (isolate (list (get-rhs (get-lhs e)) '= (list (get-lhs (get-lhs e))
                                                         (get-op (get-lhs e))
-                                                        (get-rhs e))) x))))
+                                                        (get-rhs e))) )) x
+    ))
 
 
 (defn solve
@@ -492,10 +490,10 @@
                     action postwalk-replace]
               (solve (action (get-lhs answer) (get-rhs answer))
                                         ; idk if the line below this is right, we'll see.
-                                        (remove (partial = equation) equations))
-                      (cons answer known))))))
-        equations)
-  known)
+                                        (remove (partial = equation) equation))
+                      (cons answer known)))))
+        equation)
+  known))
 
 (defn solve-equations
 "Print the equations and their solution"
@@ -507,14 +505,15 @@
 "Separate the equations into nested parenthesis"
 [expre]
   (cond
-    (if (nil? expre) fail)
-    (if (not? (seq? (first expre))) (list expre))
-    (true (append-to (create-list-of-equations (first expre))
-                     (create-list-of-equations (rest expre))))))
+    (nil? expre) fail
+    (not (seq? (first expre))) (list expre)
+    :else
+    (append-to (create-list-of-equations (first expre))
+                     (create-list-of-equations (rest expre)))))
 
 (declare translate-to-expression)
 
-(defn translate-to-expression ; rule based translator takes input rule & keys
+(defn translate-to-expression ; rule based translator takes input rule & keys rule-if rule-then (first and rest) ;rule response sublis
   "Translate an English phrase into an equation or expression"
   [value-pair] ; use re
   (or (rule-based-translator value-pair basic-student-rules :action (fn [bindings responses]
@@ -523,7 +522,7 @@
         (responses)))
   (make-var-for-word value-pair))))
 
-(translate-to-expression '(difference between ?x and ?y))
+;(translate-to-expression '(difference between ?x and ?y))
 
 (defn student
 "Solve certain algebra word problems"
@@ -531,7 +530,7 @@
   (solve-equations
     (create-list-of-equations
       (translate-to-expression
-        (remove #'noise-word-p words)))))
+        (remove noise-word-p words)))))
 
 (defn -main
   "I don't do a whole lot ... yet."
