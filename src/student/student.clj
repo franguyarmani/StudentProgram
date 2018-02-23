@@ -125,10 +125,11 @@
    conservatively assuming it could match."
   [pat1 input start]
   (cond (and (not (list? pat1))
-             (not (variable? pat1))) (let [idx (index-in-seq input pat1 start)]
-                                       (if (< idx 0)
-                                         nil
-                                         idx))
+             (not (variable? pat1)))
+    (let [idx (index-in-seq input pat1 start)]
+        (if (< idx 0)
+            nil
+           idx))
         (< start (count input)) start
         :else nil))
 
@@ -141,12 +142,7 @@
    (let [v (second (first pattern))
          pat (rest pattern)]
      (if (nil? pat)
-       ;; If there's no more pat to match, this is a simple variable match of
-       ;; ?var on the whole input.
        (match-variable v input bindings)
-       ;; Otherwise, find the first position in the input where pat could match.
-       ;; Try to match our segment until there pat from there. If this fails,
-       ;; rerun with start+1 to try matching at the next position.
        (let [pos (first-match-pos (first pat) input start)]
          (if (nil? pos)
            fail
@@ -212,22 +208,31 @@
   [pattern input bindings]
   ((get segment-matcher-table (first (first pattern))) pattern input bindings))
 
+(defn format-pat-match
+  [input-pat]
+  (conj (list (flatten (first input-pat)))
+        (flatten (second input-pat))))
+
 (defn pat-match
   ([pattern input] (pat-match pattern input no-bindings))
   ([pattern input bindings]
-   (cond (= bindings fail) fail
-         (variable? pattern) (match-variable pattern input bindings)
-         (= pattern input) bindings
-         (single-pattern? pattern) (single-matcher pattern input bindings)
-         (segment-pattern? pattern) (segment-matcher pattern input bindings)
-         (and (list? pattern) (list? input)) (pat-match
-                                              (rest pattern)
-                                              (rest input)
-                                              (pat-match
-                                               (first pattern)
-                                               (first input)
-                                               bindings))
+   (cond
+     (= bindings fail) fail
+     (variable? pattern) (match-variable pattern input bindings)
+     (= pattern input) bindings
+     (single-pattern? pattern) (single-matcher pattern input bindings)
+     ;
+     (segment-pattern? pattern) (segment-matcher pattern input bindings)
+     (and (list? pattern) (list? input))
+          (pat-match (rest pattern) (rest input)
+              (pat-match (first pattern) (first input) bindings))
          :else fail)))
+
+; pat-match does not pass the following
+;(def axyd (expand-pat-match-abbrev '(a ?x* ?y* d)))
+;(pat-match axyd '(a b c d))
+;should be ((?Y BC)(?XI) --> returns
+;However, it does accept the expanded pat match if input as a list
 
 
 ;; Rule based translator
@@ -272,7 +277,6 @@
   [input rules & keys]
   (let [matcher pat-match
         action postwalk-replace]
-    (println keys)
   (some
       (fn [rule]
           (let [result (call-arg-on-remaining-args matcher
