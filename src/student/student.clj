@@ -251,6 +251,8 @@
 (def abbreviation-table
   (atom {}))
 
+(declare unknown-parameter)
+
 (defn expand-pat-match-abbrev
   "Expand all pattern matching abbreviations in pat"
   [pat]
@@ -416,7 +418,7 @@
 (defn no-unknown-var
 "Returns true if all variables in expression are now known"
   [expre]
-  (cond (unknown-parameter ) nil
+  (cond (unknown-parameter expre) nil
     (not (seq? expre)) true
     (no-unknown-var (get-lhs expre)) (no-unknown-var (get-rhs expre))
     :else nil))
@@ -506,7 +508,7 @@
     (if (nil? expre) fail
     (if (not (seq? (first expre))) (seq expre)
     (append-to (create-list-of-equations (first expre))
-                     (create-list-of-equations (rest expre))))))
+                     (create-list-of-equations (rest expre)))))))
 
 (declare translate-to-expression)
 
