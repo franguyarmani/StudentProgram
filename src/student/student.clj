@@ -349,7 +349,7 @@
     [expre]
     (and (exp-p expre) (= (count (exp-args expre)) 2)))
 
-(defn prefix-to-infix-notation ; atom in cl == (not (seq? x)) in clojure  NOT WORKING
+(defn prefix-to-infix-notation ; atom in cl == (not (seq? x)) in clojure  
       "Translate from prefix to infix notation
        EX: Infix  --> X + Y
        EX: Prefix --> + X Y"
@@ -439,13 +439,16 @@
  [equation]
  (get-lhs equation) '= (eval (get-rhs equation)))
 
-(defn print-equation ; Not working just use printf instead of formatting the bullshit
-"Format and print the equation so we can
- see the student work"
- [header equation]
- (cl-format true "~%~d~{~%  ~a ~d~}~%" header
-   (map #'prefix-to-infix-notation equation))) ; Complete prefix-to-infix-notation and this is complete
+ (defn print-equation ; Not working just use printf instead of formatting the bullshit
+  "Format and print the equation so we can
+   see the student work"
+    [header equation]
+    (printf header)
+    (prefix-to-infix-notation equation))
 
+          ; Complete prefix-to-infix-notation and this is complete
+  
+  
 ;(print-equation "The equation to be solved is" '(* (+ 4 5) 3))
 ;(cl-format true "~d~{~% ~{ ~a~} ~d~}~%" "The equation to be solved is: " '((+ 3 4)))
 

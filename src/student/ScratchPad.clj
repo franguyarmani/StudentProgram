@@ -56,3 +56,10 @@
     (keyword? expre) true
     (= '() expre) true
     :else nil))
+
+(defn print-equation ; Not working just use printf instead of formatting the bullshit
+"Format and print the equation so we can
+ see the student work"
+  [header equation]
+    (apply str (pre))) ; Complete prefix-to-infix-notation and this is complete
+
