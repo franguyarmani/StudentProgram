@@ -208,18 +208,11 @@
   [pattern input bindings]
   ((get segment-matcher-table (first (first pattern))) pattern input bindings))
 
-(defn format-pat-match
-  [input-pat]
-  (conj (list (flatten (first input-pat)))
-        (flatten (second input-pat))))
-
 (defn pat-match
   ([pattern input] (pat-match pattern input no-bindings))
   ([pattern input bindings]
-  (do
-   (println "Entering pat match" pattern input bindings)
    (cond
-     (= bindings fail) (do (println "eq bindings fail") fail)
+     (= bindings fail)  fail
      (variable? pattern) (match-variable pattern input bindings)
      (= pattern input) bindings
      (single-pattern? pattern) (single-matcher pattern input bindings)
@@ -227,7 +220,7 @@
      (and (seq? pattern) (seq? input))
           (pat-match (rest pattern) (rest input)
               (pat-match (first pattern) (first input) bindings))
-         :else fail))))
+         :else fail)))
 
 ; pat-match does not pass the following
 ;(def axyd (expand-pat-match-abbrev '(a ?x* ?y* d)))
@@ -509,9 +502,9 @@
 (defn create-list-of-equations
 "Separate the equations into nested parenthesis"
 [expre]
-;  (cond
+  (cond
     (if (nil? expre) fail
-    (if (not (seq? (first expre))) (list expre)
+    (if (not (seq? (first expre))) (seq expre)
     (append-to (create-list-of-equations (first expre))
                      (create-list-of-equations (rest expre))))))
 
