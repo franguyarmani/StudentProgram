@@ -357,7 +357,7 @@
        (if (not (seq? expre)) expre ; works
            (map #'prefix-to-infix-notation
             (if (binary-expre-p expre)
-              (list (get-lhs expre) (get-op expre) (get-rhs expre)) expre)))) ; We need to create a left hand side and right hand side representation
+              (seq (list (get-lhs expre) (get-op expre) (get-rhs expre)))) expre))) ; We need to create a left hand side and right hand side representation
                         ; the expression.
 
 (pat-match-abbrev '?x* '(?* ?x))
