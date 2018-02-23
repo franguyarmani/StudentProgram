@@ -270,16 +270,20 @@
 
 (defn rule-based-translator
   "Apply a set of rules"
-  [input rules & keys]
-  (let [matcher pat-match
-        action postwalk-replace]
+  [input rules & {:keys [matcher rule-if action rule-then]
+                  :or {matcher pat-match
+                       rule-if first
+                       rule-then rest
+                       action postwalk-replace}}]
+;  (let [matcher pat-match
+;        action postwalk-replace]
   (some
       (fn [rule]
           (let [result (call-arg-on-remaining-args matcher
-                       (call-arg-on-remaining-args #'first rule) input)]
+                       (call-arg-on-remaining-args rule-if rule) input)]
               (if (not (= result fail))
                   (call-arg-on-remaining-args action result
-                      (call-arg-on-remaining-args #'rest rule))))) rules)))
+                      (call-arg-on-remaining-args rule-then rule))))) rules))
 
 
 ;; Begin Student
@@ -334,7 +338,7 @@
 (defn commutative-p
 "Is the operation commutative (* + =)?"
 [operand]
-(contains? operand '(+ = *)))
+( '#{+ = *} operand ))
 
 (defn make-var-for-word
 "Will make a variable given a word (ex: Tom has 3 assignments and 2 days to do it. Will he have enough days?
@@ -342,7 +346,8 @@
   Word = days = 2
   We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
   [input-words]
-  (first input-words))
+   (do (println "make var for word: " input-words))
+  (first (list input-words)))
 
 (defn binary-expre-p
     "Is the input expression binary?"
@@ -506,26 +511,37 @@
 [expre]
   (cond
     (nil? expre) fail
-    (not (seq? (first expre))) (seq expre)
+    (seq? (first expre)) (seq expre)
     :else (append-to (create-list-of-equations (first expre))(create-list-of-equations (rest expre)))))
 
 (declare translate-to-expression)
 
 (defn translate-pair
   [value-pair]
+  (do (println (first value-pair)))
   (cons (rest value-pair)
         (translate-to-expression (rest value-pair))))
 
 (defn translate-to-expression ; rule based translator takes input rule & keys rule-if rule-then (first and rest) ;rule response sublis
   "Translate an English phrase into an equation or expression"
-  [value-pair] ; use re
-  (let [ action postwalk-replace ]
-  (or (rule-based-translator value-pair basic-student-rules
+  [value-pair & { :keys [rule-if rule-then action]
+                               :or {
+                                    action postwalk-replace
+                                    rule-if first
+                                    rule-then rest
+                                   }}]
+  (do (println "// translate-to-expression // current value pair: " value-pair ))
+  (do (println "// translate-to-expression // entering rule-based-translator"))
+  (or (rule-based-translator value-pair basic-student-rules :action
           (fn [bindings response]
-            (println bindings)
-            (println response)
-            (action (map #'translate-pair bindings) response)))
-      (make-var-for-word value-pair))))
+            (do (println "// translate-to-expression lambda // binding: " bindings))
+            (do (println "// translate-to-expression lambda // response: " response))
+            (action (into []
+                          (map (fn [[var binding-two]]
+                                (do (println "// translate-to-expression lambda lambda // var: " var))
+                                (do (println "// translate-to-expression lambda lambda // binding-two: " binding-two))
+                                 [var (translate-to-expression binding-two)]) bindings)) response)))
+      (make-var-for-word value-pair)))
 
 ;(translate-to-expression '(difference between ?x and ?y))
 
