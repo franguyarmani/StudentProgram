@@ -81,3 +81,4 @@
                       (cons answer known))))))
         equations)
   (do (println "foo")) ))
+  

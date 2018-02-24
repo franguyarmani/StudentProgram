@@ -504,6 +504,7 @@
                       (cons answer known))))))
         equations)
   (do (println "foo")) ))
+  
 
 (defn solve-equations
 "Print the equations and their solution"
