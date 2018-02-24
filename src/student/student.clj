@@ -222,13 +222,6 @@
               (pat-match (first pattern) (first input) bindings))
          :else fail)))
 
-; pat-match does not pass the following
-;(def axyd (expand-pat-match-abbrev '(a ?x* ?y* d)))
-;(pat-match axyd '(a b c d))
-;should be ((?Y BC)(?XI) --> returns
-;However, it does accept the expanded pat match if input as a list
-
-
 ;; Rule based translator
 ;; ================================================================================
 (defn call-arg-on-remaining-args ; funcall
@@ -242,7 +235,7 @@
     [object]
     (and (list? object) (not (empty? object))))
 
-(defn append-to ; For use in create-list-of-equations DOUBLE CHECK
+(defn append-to
 "Append all values to a list and sort it
  (append-to '(1 2 3) '() '(4 5 6) '1) --> (1 1 2 3 4 5 6)"
 [& input]
@@ -300,11 +293,6 @@
   "Turn 1 + 2 into + 1 2"
   [exp] ; method for taking it from a list
   (list (second exp) (first exp) (nth exp 2)))
-
-  (comment
-(defn make-expression ; Are we going to be taking this from the student list of rules '(1 + 2) or will it be 3 vars? (1 + 2)
-[lhs op rhs]
-(conj '() (quote (symbol op) lhs rhs)))) ; Method for taking it from three vars -- Couldn't figure this out
 
 (defn noise-word-p ; CHECK according to the book
 "A word we don't really care about"
@@ -399,9 +387,9 @@
   ((one half ?x*)         (/ ?x 2))
   ((twice ?x*)            (* 2 ?x))
   ((square ?x*)           (* ?x ?x))))
- ; ((?x* % less than ?y*)  (* ?y (/ (- 100 ?x) 100)))
- ; ((?x* % more than ?y*)  (* ?y (/ (+ 100 ?x) 100)))
- ; ((?x* % ?y*)            (* (/ ?x 100) ?y))))
+  ((?x* % less than ?y*)  (* ?y (/ (- 100 ?x) 100)))
+  ((?x* % more than ?y*)  (* ?y (/ (+ 100 ?x) 100)))
+  ((?x* % ?y*)            (* (/ ?x 100) ?y))))
 
 (defn map-expand-to-rules
   "Expand all the rules to allow us to actually match/translate"
@@ -415,14 +403,6 @@
 
 ; STUDENT FUNCTIONS NOT COMPLETED
 ; ===================================================================================
-; Figuring out how to represent left and right side of equations ?
-; We want to use defrecords/deftype --> structs are becoming obselete
-
-; Figuring out how to represent our list of options ?
-(defstruct rule  :pattern :response) ; https://clojure.org/reference/data_structures
-
-
-
 (defn in-exp ; Is this equal to contains? --> https://clojuredocs.org/clojure.core/contains_q --> Contains? can't act on lists
 "Return true if input is within the expression"
 [x expre]
@@ -448,8 +428,6 @@
     (no-unknown-var (get-rhs expre))(one-unknown-var (get-lhs expre))
     :else nil))
 
-
-
 (defn solve-arithmetic ; We may need to add a constructor class to this to have proper formatting
 "Do the arithmetic for the right hand side
  This assumes the right hand side is in the
@@ -463,12 +441,6 @@
     [header equation]
     (printf header)
     (prefix-to-infix-notation equation))
-
-          ; Complete prefix-to-infix-notation and this is complete
-
-
-;(print-equation "The equation to be solved is" '(* (+ 4 5) 3))
-;(cl-format true "~d~{~% ~{ ~a~} ~d~}~%" "The equation to be solved is: " '((+ 3 4)))
 
 (defn isolate
 "Isolate the lone x in e on the left hand side of e
@@ -518,9 +490,6 @@
                       (cons answer known)))))
         equations)
   known))
-
-  ;(do (println "foo")) )
-
 
 (defn solve-equations
 "Print the equations and their solution"
@@ -572,8 +541,6 @@
                                   bindings))
                                     response))) ; THis is returning
       (make-var-for-word value-pair)))
-
-;(translate-to-expression '(difference between ?x and ?y))
 
 (defn student
 "Solve certain algebra word problems"
