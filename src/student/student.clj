@@ -442,18 +442,20 @@
 "Returns the single unkown expression if only one exists"
   [expre]
   (cond
-    (unknown-parameter expre) nil
-    (not (seq? expre)) nil
+    (symbol? expre) expre ; CHECK
+    (not (seq? expre)) fail ; CHECK
     (no-unknown-var (get-lhs expre))(one-unknown-var (get-rhs expre))
-    (no-unknown-var (get-rhs expre))(one-unknown-var (get-rhs expre))
+    (no-unknown-var (get-rhs expre))(one-unknown-var (get-lhs expre))
     :else nil))
+
+
 
 (defn solve-arithmetic ; We may need to add a constructor class to this to have proper formatting
 "Do the arithmetic for the right hand side
  This assumes the right hand side is in the
  correct form"
  [equation]
- (get-lhs equation) '= (eval (get-rhs equation)))
+ (seq (list '= (get-lhs equation) (eval (get-rhs equation)))))
 
  (defn print-equation ; Not working just use printf instead of formatting the bullshit
   "Format and print the equation so we can
@@ -497,23 +499,28 @@
     ))
 
 
+; Broken at line 515 index out of bounds
 (defn solve
 "Solve a system of equations by constraint propagation"
-[equation known]
+[equations known]
 (or
   (some (fn [equation]
     (let [x (one-unknown-var equation)]
             (when x
+              (do (println x))
               (let [answer  (solve-arithmetic
-                            (isolate equation x))
+                            (isolate equation x)) ; should look like: y = 5
                     action postwalk-replace]
-              (solve (action (get-lhs answer) (get-rhs answer))
+              (do (println answer))
+              (solve (action (get-rhs answer) (get-lhs answer))
                                         ; idk if the line below this is right, we'll see.
                                         (remove equation equations))
-                      (cons answer known))))))
+                      (cons answer known)))))
         equations)
-  (do (println "foo")) )
-  
+  known))
+
+  ;(do (println "foo")) )
+
 
 (defn solve-equations
 "Print the equations and their solution"
@@ -542,6 +549,7 @@
         (rest value-pair)
         (translate-to-expression (rest value-pair))))
 
+; Perhaps broken, but need other things to check
 (defn translate-to-expression ; rule based translator takes input rule & keys rule-if rule-then (first and rest) ;rule response sublis
   "Translate an English phrase into an equation or expression"
   [value-pair & { :keys [rule-if rule-then action]
