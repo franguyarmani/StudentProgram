@@ -441,7 +441,8 @@
 (defn one-unknown-var
 "Returns the single unkown expression if only one exists"
   [expre]
-  (cond (unknown-parameter expre) nil
+  (cond
+    (unknown-parameter expre) nil
     (not (seq? expre)) nil
     (no-unknown-var (get-lhs expre))(one-unknown-var (get-rhs expre))
     (no-unknown-var (get-rhs expre))(one-unknown-var (get-rhs expre))
@@ -498,22 +499,20 @@
 
 (defn solve
 "Solve a system of equations by constraint propagation"
-[equations known]
+[equation known]
 (or
   (some (fn [equation]
     (let [x (one-unknown-var equation)]
-            
             (when x
               (let [answer  (solve-arithmetic
                             (isolate equation x))
                     action postwalk-replace]
-                   
-              (solve (action (get-lhs answer) (get-rhs answer)
+              (solve (action (get-lhs answer) (get-rhs answer))
                                         ; idk if the line below this is right, we'll see.
-                                        (remove equation equations))
-                      (cons answer known))))))
-        equations)
-  (do (println "foo")) ))
+                                        (remove (partial = equation) equation))
+                      (cons answer known)))))
+        equation)
+  known))
 
 (defn solve-equations
 "Print the equations and their solution"
