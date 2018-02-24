@@ -492,16 +492,18 @@
 (or
   (some (fn [equation]
     (let [x (one-unknown-var equation)]
+            
             (when x
               (let [answer  (solve-arithmetic
                             (isolate equation x))
                     action postwalk-replace]
+                   
               (solve (action (get-lhs answer) (get-rhs answer)
                                         ; idk if the line below this is right, we'll see.
                                         (remove equation equations))
-                      (cons answer known)))))
-        equation)
-  known)))
+                      (cons answer known))))))
+        equations)
+  (do (println "foo")) ))
 
 (defn solve-equations
 "Print the equations and their solution"
