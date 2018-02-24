@@ -386,7 +386,7 @@
   ((half ?x*)             (/ ?x 2))
   ((one half ?x*)         (/ ?x 2))
   ((twice ?x*)            (* 2 ?x))
-  ((square ?x*)           (* ?x ?x))))
+  ((square ?x*)           (* ?x ?x))
   ((?x* % less than ?y*)  (* ?y (/ (- 100 ?x) 100)))
   ((?x* % more than ?y*)  (* ?y (/ (+ 100 ?x) 100)))
   ((?x* % ?y*)            (* (/ ?x 100) ?y))))
