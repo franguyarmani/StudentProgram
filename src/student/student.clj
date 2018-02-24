@@ -257,10 +257,10 @@
   "Expand all pattern matching abbreviations in pat"
   [pat]
   (cond
-      (unknown-parameter pat)(get @abbreviation-table pat pat)
+      (symbol? pat)(get @abbreviation-table pat pat)
       (empty? pat) pat
-          :else (cons (expand-pat-match-abbrev (first pat))
-                      (expand-pat-match-abbrev (rest pat)))))
+          :else (lazy-seq(cons (expand-pat-match-abbrev (first pat))
+                      (expand-pat-match-abbrev (rest pat))))))
 
 (defn pat-match-abbrev
   "Define symbol as macro and swap for a pat-match(ed) patted"
@@ -341,21 +341,21 @@
 ( '#{+ = *} operand ))
 
 (defn make-var-for-word
-"Will make a variable given a word (ex: Tom has 3 assignments and 2 days to do it. Will he have enough days?
+ "Will make a variable given a word (ex: Tom has 3 assignments and 2 days to do it. Will he have enough days?
   Word = Assignment = 3
   Word = days = 2
   We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
   [input-words]
    (do (println "make var for word: " input-words))
-  (first (list input-words)))
+  (first input-words))
 
 (defn binary-expre-p
     "Is the input expression binary?"
     [expre]
     (and (exp-p expre) (= (count (exp-args expre)) 2)))
 
-(defn prefix-to-infix-notation ; atom in cl == (not (seq? x)) in clojure  
-      "Translate from prefix to infix notation
+(defn prefix-to-infix-notation ; atom in cl == (not (seq? x)) in clojure
+       "Translate from prefix to infix notation
        EX: Infix  --> X + Y
        EX: Prefix --> + X Y"
        [expre & all-elem-test]
@@ -368,7 +368,7 @@
 (pat-match-abbrev '?x* '(?* ?x))
 (pat-match-abbrev '?y* '(?* ?y))
 
-(def basic-student-rules
+(def ^:dynamic *basic-student-rules*
 '(((?x* .)                            ?x)
   ((?x* . ?y*)                   (?x ?y))
   ((?if ?x* (symbol ",") then ?y*)  (?x ?y))
@@ -403,6 +403,16 @@
  ; ((?x* % more than ?y*)  (* ?y (/ (+ 100 ?x) 100)))
  ; ((?x* % ?y*)            (* (/ ?x 100) ?y))))
 
+(defn map-expand-to-rules
+  "Expand all the rules to allow us to actually match/translate"
+  [func [key value]]
+  [(func key) value])
+
+(def ^:dynamic *student-rules*
+  (map (partial map-expand-to-rules expand-pat-match-abbrev)
+       *basic-student-rules*))
+
+
 ; STUDENT FUNCTIONS NOT COMPLETED
 ; ===================================================================================
 ; Figuring out how to represent left and right side of equations ?
@@ -431,7 +441,8 @@
 (defn one-unknown-var
 "Returns the single unkown expression if only one exists"
   [expre]
-  (cond (unknown-parameter expre) nil
+  (cond
+    (unknown-parameter expre) nil
     (not (seq? expre)) nil
     (no-unknown-var (get-lhs expre))(one-unknown-var (get-rhs expre))
     (no-unknown-var (get-rhs expre))(one-unknown-var (get-rhs expre))
@@ -452,8 +463,8 @@
     (prefix-to-infix-notation equation))
 
           ; Complete prefix-to-infix-notation and this is complete
-  
-  
+
+
 ;(print-equation "The equation to be solved is" '(* (+ 4 5) 3))
 ;(cl-format true "~d~{~% ~{ ~a~} ~d~}~%" "The equation to be solved is: " '((+ 3 4)))
 
@@ -488,22 +499,20 @@
 
 (defn solve
 "Solve a system of equations by constraint propagation"
-[equations known]
+[equation known]
 (or
   (some (fn [equation]
     (let [x (one-unknown-var equation)]
-            
             (when x
               (let [answer  (solve-arithmetic
                             (isolate equation x))
                     action postwalk-replace]
-                   
-              (solve (action (get-lhs answer) (get-rhs answer)
+              (solve (action (get-lhs answer) (get-rhs answer))
                                         ; idk if the line below this is right, we'll see.
                                         (remove equation equations))
                       (cons answer known))))))
         equations)
-  (do (println "foo")) ))
+  (do (println "foo")) )
   
 
 (defn solve-equations
@@ -515,17 +524,22 @@
 (defn create-list-of-equations
 "Separate the equations into nested parenthesis"
 [expre]
+(do (println "// create-list-of-equations // expre: " expre ))
   (cond
     (nil? expre) fail
-    (seq? (first expre)) (seq expre)
-    :else (append-to (create-list-of-equations (first expre))(create-list-of-equations (rest expre)))))
+    (not (seq? (first expre))) (list expre)
+    :else
+      (append-to
+          (create-list-of-equations (first expre))
+                 (create-list-of-equations (rest expre)))))
 
 (declare translate-to-expression)
 
 (defn translate-pair
   [value-pair]
-  (do (println (first value-pair)))
-  (cons (rest value-pair)
+  (do (println "This is a first pair : " value-pair))
+  (cons
+        (rest value-pair)
         (translate-to-expression (rest value-pair))))
 
 (defn translate-to-expression ; rule based translator takes input rule & keys rule-if rule-then (first and rest) ;rule response sublis
@@ -538,15 +552,17 @@
                                    }}]
   (do (println "// translate-to-expression // current value pair: " value-pair ))
   (do (println "// translate-to-expression // entering rule-based-translator"))
-  (or (rule-based-translator value-pair basic-student-rules :action
+  (or (rule-based-translator value-pair *student-rules* :action
           (fn [bindings response]
             (do (println "// translate-to-expression lambda // binding: " bindings))
             (do (println "// translate-to-expression lambda // response: " response))
-            (action (into []
-                          (map (fn [[var binding-two]]
+            (action  (into []
+                           (map (fn [[var binding-two]]
                                 (do (println "// translate-to-expression lambda lambda // var: " var))
                                 (do (println "// translate-to-expression lambda lambda // binding-two: " binding-two))
-                                 [var (translate-to-expression binding-two)]) bindings)) response)))
+                                 [var (translate-pair binding-two)]) ; This throws the variable to translate-pair
+                                  bindings))
+                                    response))) ; THis is returning
       (make-var-for-word value-pair)))
 
 ;(translate-to-expression '(difference between ?x and ?y))
