@@ -257,9 +257,10 @@
 (defn expand-pat-match-abbrev
   "Expand all pattern matching abbreviations in pat"
   [pat]
+  (println "pattern: " pat)
   (cond
       (symbol? pat)(get @abbreviation-table pat pat)
-      (empty? pat) pat
+      (not (seq? pat)) pat
           :else (lazy-seq(cons (expand-pat-match-abbrev (first pat))
                       (expand-pat-match-abbrev (rest pat))))))
 
@@ -273,15 +274,16 @@
   "Apply a set of rules"
   [input rules & {:keys [matcher rule-if action rule-then]
                   :or {matcher pat-match
-                       rule-if first
-                       rule-then rest
-                       action postwalk-replace}}]
-;  (let [matcher pat-match
-;        action postwalk-replace]
+                       rule-if #'first
+                       rule-then #'rest
+                       action #'postwalk-replace}}]
   (some
       (fn [rule]
           (let [result (call-arg-on-remaining-args matcher
                        (call-arg-on-remaining-args rule-if rule) input)]
+                        (println "rule: " rule)
+                        (println "result: " result)
+              
               (if (not (= result fail))
                   (call-arg-on-remaining-args action result
                       (call-arg-on-remaining-args rule-then rule))))) rules))
@@ -364,12 +366,12 @@
 (pat-match-abbrev '?x* '(?* ?x))
 (pat-match-abbrev '?y* '(?* ?y))
 
-(def ^:dynamic *basic-student-rules*
+(def ^:dynamic *basic-student-rules* 
 '(((?x* .)                            ?x)
   ((?x* . ?y*)                   (?x ?y))
-  ((?if ?x* (symbol ",") then ?y*)  (?x ?y))
+  ;((?if ?x* (symbol ",") then ?y*)  (?x ?y))
   ((?if ?x* then ?y*)            (?x ?y))
-  ((?if ?x* (symbol ",") ?y*)    (?x ?y))
+  ;((?if ?x* (symbol ",") ?y*)    (?x ?y))
  ;((?x* (symbol ,) and ?y*)      (?x ?y))
   ((find ?x* and ?y*)     ((= to-find-1 ?x) (= to-find-2 ?y)))
   ((find ?x*)             (= to-find ?x))
