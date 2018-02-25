@@ -48,7 +48,6 @@
 
 (defn expre? 
   [e]
-  (do (println e))
   (and
     (not= nil (get-op e))
     (not= nil (get-lhs e))
@@ -485,18 +484,18 @@
 
 (or
   (some (fn [equation]
-    (do (println equation))
     (let [x (one-unknown-var equation)]
-            
+            (do (println "system of equations: " equations))
+            (do (println "this is the equation: " equation))
             (when x
               ;(do (println x))
               (let [answer  (solve-arithmetic
                             (isolate equation x)) ; should look like: y = 5
                     action postwalk-replace]
-              (do (println answer))
-              (solve (action {(get-rhs answer) (get-lhs answer)}
+              (do (println "this is the answer: " answer))
+              (solve (action {(first answer) (get-rhs answer)}
                                         ; idk if the line below this is right, we'll see.
-                                        (remove equation equations))
+                                        (remove (partial = equation) equations))
                       (cons answer known))))))
         equations)
   known))
