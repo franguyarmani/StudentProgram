@@ -451,56 +451,57 @@
     ; First case
     (= (get-lhs e) x) e
     ; Second case
-    (in-exp x (get-lhs e) (isolate (list (get-rhs e) '= (get-lhs e)) x))
+    (in-exp x (get-rhs e)) (isolate (list (get-rhs e) '= (get-lhs e)) x)
     ; Third case
-    (isolate (list (get-lhs (get-lhs e)) '=
+    (in-exp x (get-lhs (get-lhs e))) (isolate (list (get-lhs (get-lhs e)) '=
                    (list (get-rhs e)
-                         (return-inverse-operation (get-op (get-lhs e)))
-                         (get-rhs (get-lhs e))))) x
+                         (return-inverse-operation (get-op (get-lhs e)) operators-and-their-inverses)
+                         (get-rhs (get-lhs e)))) x)
     ; Fourth case
-    (commutative-p (get-op (get-lhs e)))
-    (isolate (list (get-rhs (get-lhs e)) '= (list (get-rhs e)
+    (commutative-p (get-op (get-lhs e))) (isolate (list (get-rhs (get-lhs e)) '= (list (get-rhs e)
                                                   (return-inverse-operation
-                                                          (get-op (get-lhs e)))
-                                                  (get-rhs (get-lhs e))))) x
+                                                          (get-op (get-lhs e)) operators-and-their-inverses)
+                                                  (get-lhs (get-lhs e)))) x)
     ; Fifth case
-    (true
-          (isolate (list (get-rhs (get-lhs e)) '= (list (get-lhs (get-lhs e))
+    :else (isolate (list (get-rhs (get-lhs e)) '= (list (get-lhs (get-lhs e))
                                                         (get-op (get-lhs e))
-                                                        (get-rhs e))) )) x
-    ))
+                                                        (get-rhs e))) x)))
 
 
 ; Broken at line 515 index out of bounds
 (defn solve
 "Solve a system of equations by constraint propagation"
 [equations known]
+
 (or
   (some (fn [equation]
+    (do (println equation))
     (let [x (one-unknown-var equation)]
+            
             (when x
-              (do (println x))
+              ;(do (println x))
               (let [answer  (solve-arithmetic
                             (isolate equation x)) ; should look like: y = 5
                     action postwalk-replace]
               (do (println answer))
-              (solve (action (get-rhs answer) (get-lhs answer))
+              (solve (action {(get-rhs answer) (get-lhs answer)}
                                         ; idk if the line below this is right, we'll see.
                                         (remove equation equations))
-                      (cons answer known)))))
+                      (cons answer known))))))
         equations)
   known))
 
 (defn solve-equations
 "Print the equations and their solution"
 [equations]
+  (do (println equations))
   (print-equation "The equations I am currently solving are: " equations)
   (print-equation "The solution is: " (solve equations nil)))
 
 (defn create-list-of-equations
 "Separate the equations into nested parenthesis"
 [expre]
-(do (println "// create-list-of-equations // expre: " expre ))
+(do (println "// create-list-of-equations // expre: " expre )) ;((= (+ 3 4) (* (- (+ 2 x)) 7)) (= (+ (* 3 x ) y) 12 ))
   (cond
     (nil? expre) fail
     (not (seq? (first expre))) (list expre)
