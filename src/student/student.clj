@@ -45,6 +45,15 @@
     fail
     (nth expre 2)))
 
+
+(defn expre? 
+  [e]
+  (do (println e))
+  (and
+    (not= nil (get-op e))
+    (not= nil (get-lhs e))
+    (not= nil (get-rhs e))))
+
 (def no-bindings
   "Denotes successful match with no variable bindings"
   {})
@@ -291,8 +300,8 @@
 
 (defn make-expression
   "Turn 1 + 2 into + 1 2"
-  [exp] ; method for taking it from a list
-  (list (second exp) (first exp) (nth exp 2)))
+  [lhs op rhs] ; method for taking it from a list
+  (list op lhs rhs))
 
 (defn noise-word-p ; CHECK according to the book
 "A word we don't really care about"
@@ -416,24 +425,24 @@
   (cond (unknown-parameter expre) nil
     (not (seq? expre)) true
     (no-unknown-var (get-lhs expre)) (no-unknown-var (get-rhs expre))
-    :else nil))
+    :else fail))
 
 (defn one-unknown-var
 "Returns the single unkown expression if only one exists"
   [expre]
   (cond
     (symbol? expre) expre ; CHECK
-    (not (seq? expre)) fail ; CHECK
+    (not (expre? expre)) fail ; CHECK
     (no-unknown-var (get-lhs expre))(one-unknown-var (get-rhs expre))
     (no-unknown-var (get-rhs expre))(one-unknown-var (get-lhs expre))
-    :else nil))
+    :else fail))
 
 (defn solve-arithmetic ; We may need to add a constructor class to this to have proper formatting
 "Do the arithmetic for the right hand side
  This assumes the right hand side is in the
  correct form"
  [equation]
- (seq (list '= (get-lhs equation) (eval (get-rhs equation)))))
+ (list (get-lhs equation) '= (eval (get-rhs equation))))
 
  (defn print-equation ; Not working just use printf instead of formatting the bullshit
   "Format and print the equation so we can
@@ -447,25 +456,26 @@
  Requires many other functions --> probably one of the
  last functions we will finish."
  [e x]
+  (do (println "x: " x))
+  (do (println "e: " e))
   (cond
     ; First case
     (= (get-lhs e) x) e
     ; Second case
-    (in-exp x (get-rhs e)) (isolate (list (get-rhs e) '= (get-lhs e)) x)
+    (in-exp x (get-rhs e)) (isolate (make-expression (get-rhs e) '= (get-lhs e)) x)
     ; Third case
-    (in-exp x (get-lhs (get-lhs e))) (isolate (list (get-lhs (get-lhs e)) '=
-                   (list (get-rhs e)
+    (in-exp x (get-lhs (get-lhs e))) (isolate (make-expression (get-lhs (get-lhs e)) '=
+                   (make-expression (get-rhs e)
                          (return-inverse-operation (get-op (get-lhs e)) operators-and-their-inverses)
                          (get-rhs (get-lhs e)))) x)
     ; Fourth case
-    (commutative-p (get-op (get-lhs e))) (isolate (list (get-rhs (get-lhs e)) '= (list (get-rhs e)
+    (commutative-p (get-op (get-lhs e))) (isolate (make-expression (get-rhs (get-lhs e)) '= (make-expression (get-rhs e)
                                                   (return-inverse-operation
                                                           (get-op (get-lhs e)) operators-and-their-inverses)
                                                   (get-lhs (get-lhs e)))) x)
     ; Fifth case
-    :else (isolate (list (get-rhs (get-lhs e)) '= (list (get-lhs (get-lhs e))
-                                                        (get-op (get-lhs e))
-                                                        (get-rhs e))) x)))
+    :else (isolate (make-expression (get-rhs (get-lhs e)) '= (make-expression (get-lhs (get-lhs e)) (get-op (get-lhs e)) (get-rhs e))) 
+                                                          x)))
 
 
 ; Broken at line 515 index out of bounds
