@@ -259,8 +259,7 @@
   [pat]
   (cond
       (symbol? pat)(get @abbreviation-table pat pat)
-      (not (seq? pat)) pat
-      (not (empty? pat)) pat
+      (empty? pat) pat
           :else (lazy-seq(cons (expand-pat-match-abbrev (first pat))
                       (expand-pat-match-abbrev (rest pat))))))
 
