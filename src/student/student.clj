@@ -164,6 +164,7 @@
                (segment-match-* pattern input bindings (+ pos 1))
                b2))))))))
 
+
 (defn segment-match-+
   "Match ?+ -- one or more elements of input."
   [pattern input bindings]
@@ -206,8 +207,8 @@
 (defn segment-pattern?
   "Is this a segment-matching pattern?"
   [pattern]
-  (and (seq? pattern)
-       (seq? (first pattern))
+  (and (sequential? pattern)
+       (sequential? (first pattern))
        (symbol? (first (first pattern)))
        (get segment-matcher-table (first (first pattern)))))
 
@@ -215,6 +216,7 @@
   "Call the right function for this kind of segment pattern."
   [pattern input bindings]
   ((get segment-matcher-table (first (first pattern))) pattern input bindings))
+
 
 (defn pat-match
   ([pattern input] (pat-match pattern input no-bindings))
@@ -259,8 +261,7 @@
   [pat]
   (cond
       (symbol? pat)(get @abbreviation-table pat pat)
-      (not (seq? pat)) pat
-      (not (empty? pat)) pat
+      (empty? pat) pat
           :else (lazy-seq(cons (expand-pat-match-abbrev (first pat))
                       (expand-pat-match-abbrev (rest pat))))))
 
@@ -273,17 +274,20 @@
 (defn rule-based-translator
   "Apply a set of rules"
   [input rules & {:keys [matcher rule-if action rule-then]
-                  :or {matcher pat-match
-                       rule-if #'first
-                       rule-then #'rest
-                       action #'postwalk-replace}}]
+                  :or {
+                       matcher pat-match
+                       rule-if first
+                       rule-then rest
+                       action postwalk-replace
+                      }}]
   (some
       (fn [rule]
-          (let [result (call-arg-on-remaining-args matcher
-                       (call-arg-on-remaining-args rule-if rule) input)]  
-              (if (not (= result fail))
-                  (call-arg-on-remaining-args action result
-                      (call-arg-on-remaining-args rule-then rule))))) rules))
+        (do (println "// rule rbt // rule: " (first rule)))
+          (let [result (pat-match (first rule) input)]  
+            (do (println "match: // rbt : " result))
+              (if (not (= result fail))   ; Is 
+                  (replace result (rest rule))))) 
+  rules))
 
 
 ;; Begin Student
@@ -450,7 +454,7 @@
    see the student work"
     [header equation]
     (printf header)
-    (prefix-to-infix-notation equation))
+    (map #'prefix-to-infix-notation equation))
 
 (defn isolate
 "Isolate the lone x in e on the left hand side of e
@@ -483,7 +487,6 @@
 (defn solve
 "Solve a system of equations by constraint propagation"
 [equations known]
-
 (or
   (some (fn [equation]
     (let [x (one-unknown-var equation)]
@@ -547,12 +550,14 @@
                                                                         (do (println "// translate-to-expression lambda // response: " response))
             (p-replace  (into {}
                            (map (fn [[var binding-to]]
-                                (do (println "// translate-to-expression lambda lambda // var: " var))
-                                (do (println "// translate-to-expression lambda lambda // binding-to: " binding-to))
-                                (do (println "// translate-to-expression lambda lambda // binding-to: " (list var binding-to)))
-                                 [var (translate-pair (list var binding-to))]) ; This throws the variable to translate-pair
-                                  bindings))
-                                    response))) ; THis is returning
+                                                                         ;  (do (println "// translate-to-expression lambda lambda // var: " var))
+                                                                         ;  (do (println "// translate-to-expression lambda lambda // binding-to: " binding-to))
+                                                                                     ;  (do (println "// translate-to-expression lambda lambda // binding-to: " (list var binding-to)))
+                                 [var (translate-pair (list var binding-to))]
+                                 (do (println "After translate-par // var: " var))
+                                 ) ; This throws the variable to translate-pair
+                            bindings))
+            response))) ; THis is returning
       (make-var-for-word sentence)))
 
 (defn student
