@@ -525,10 +525,14 @@
 
 (defn translate-pair
   [value-pair]
-  (do (println "This is a first pair : " value-pair))
+  (do (println "// translate-pair // This is a first pair : " value-pair))
   (cons
         (rest value-pair)
-        (translate-to-expression (rest value-pair))))
+        (translate-to-expression (rest value-pair))
+        
+        ;(let [pair (translate-to-expression (rest value-pair))
+        ;  (if pair)])
+        ))
 
 ; Perhaps broken, but need other things to check
 (defn translate-to-expression ; rule based translator takes input rule & keys rule-if rule-then (first and rest) ;rule response sublis
@@ -540,20 +544,21 @@
                                     rule-then rest
                                    }}]
   (do (println "// translate-to-expression // current sentence: " sentence ))
-  (do (println "// translate-to-expression // entering rule-based-translator"))
+  ;(do (println "// translate-to-expression // entering rule-based-translator"))
   (or (rule-based-translator sentence *student-rules* 
     :action (fn [bindings response]
                                                                         (do (println "// translate-to-expression lambda // binding: " bindings))
-                                                                        (do (println "// translate-to-expression lambda // response: " response))
+                                                                        (do (println "// translate-to-expression lambda // (pre-replace) response: " response))
             (p-replace  (into {}
-                           (map (fn [[var binding-to]]
-                                (do (println "// translate-to-expression lambda lambda // var: " var))
-                                (do (println "// translate-to-expression lambda lambda // binding-to: " binding-to))
-                                (do (println "// translate-to-expression lambda lambda // binding-to: " (list var binding-to)))
+                          (map (fn [[var binding-to]]
+                                                                        (do (println "// translate-to-expression lambda lambda // var: " var))
+                                                                        (do (println "// translate-to-expression lambda lambda // binding-to: " binding-to))
+                                                                        (do (println "// translate-to-expression lambda lambda // var binding-to: " (list var binding-to)))
                                  [var (translate-pair (list var binding-to))]) ; This throws the variable to translate-pair
-                                  bindings))
-                                    response))) ; THis is returning
-      (make-var-for-word sentence)))
+                            bindings))
+              response))) ; THis is returning
+                                                                        (do (println "// translate-to-expression lambda // (post-replace) response: " response))
+      sentence))
 
 (defn student
 "Solve certain algebra word problems"
