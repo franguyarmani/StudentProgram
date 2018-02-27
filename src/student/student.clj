@@ -232,11 +232,11 @@
      (= bindings fail)  fail
      (variable? pattern) (match-variable pattern input bindings)
      (= pattern input) bindings
-     (single-pattern? pattern) (single-matcher pattern input bindings)
      (segment-pattern? pattern) (segment-matcher pattern input bindings)
-     (and (seq? pattern) (seq? input) (= (count pattern) 2))
-     (pat-match (flatten (rest pattern)) (rest input)
-        (pat-match (first pattern) (first input) bindings))
+     (single-pattern? pattern) (single-matcher pattern input bindings)
+   ;  (and (seq? pattern) (seq? input) (= (count pattern) 2))
+   ;  (pat-match (flatten (rest pattern)) (rest input)
+   ;     (pat-match (first pattern) (first input) bindings))
      (and (seq? pattern) (seq? input))
           (pat-match (rest pattern) (rest input)
               (pat-match (first pattern) (first input) bindings))
