@@ -342,7 +342,7 @@
   We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
   [input-words]
    (do (println "make var for word: " input-words))
-    input-words)
+   (first (list  input-words)))
 
 (defn binary-expre-p
     "Is the input expression binary?"
@@ -362,6 +362,11 @@
 
 (pat-match-abbrev '?x* '(?* ?x))
 (pat-match-abbrev '?y* '(?* ?y))
+
+(def ^:dynamic *basic-basic-student-rules*
+  `[
+    ~['(?x is ?y)  '(= ?x ?y)]
+  ])
 
 (def ^:dynamic *basic-student-rules* 
   `[
@@ -423,6 +428,7 @@
 (defn no-unknown-var
 "Returns true if all variables in expression are now known"
   [expre]
+  (println "unknown expre : " expre)
   (cond (unknown-parameter expre) nil
     (not (seq? expre)) true
     (no-unknown-var (get-lhs expre)) (no-unknown-var (get-rhs expre))
@@ -450,7 +456,7 @@
    see the student work"
     [header equation]
     (printf header)
-    (prefix-to-infix-notation equation))
+    (map #'prefix-to-infix-notation equation))
 
 (defn isolate
 "Isolate the lone x in e on the left hand side of e
@@ -540,7 +546,7 @@
                                     rule-then rest
                                    }}]
   (do (println "// translate-to-expression // current sentence: " sentence ))
-  (or (rule-based-translator sentence *basic-student-rules* 
+  (or (rule-based-translator sentence *basic-basic-student-rules* 
     :action (fn [bindings response]
                                                                         (do (println "// translate-to-expression lambda // binding: " bindings))
                                                                         (do (println "// translate-to-expression lambda // response: " response))
@@ -549,7 +555,7 @@
                                 (do (println "// translate-to-expression lambda lambda // var: " var))
                                 (do (println "// translate-to-expression lambda lambda // binding-to: " binding-to))
                                 (do (println "// translate-to-expression lambda lambda // binding-to: " (list var binding-to)))
-                                 [var (translate-pair (list var binding-to))]) ; This throws the variable to translate-pair
+                                 [var (translate-to-expression binding-to)]) ; This throws the variable to translate-pair
                                   bindings))
                                     response))) ; THis is returning
       (make-var-for-word sentence)))
