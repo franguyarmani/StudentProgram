@@ -514,10 +514,10 @@
 [expre]
 (do (println "// create-list-of-equations // expre: " expre )) ;((= (+ 3 4) (* (- (+ 2 x)) 7)) (= (+ (* 3 x ) y) 12 ))
   (cond
-    (nil? expre) fail
-    (not (seq? (first expre))) (list expre)
+    (empty? expre) fail
+    (not (sequential? (first expre))) (list expre)
     :else
-      (append-to
+      (concat
           (create-list-of-equations (first expre))
                  (create-list-of-equations (rest expre)))))
 
