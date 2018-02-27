@@ -219,6 +219,9 @@
 (defn pat-match
   ([pattern input] (pat-match pattern input no-bindings))
   ([pattern input bindings]
+    (do (println "pattern // pat-match : " pattern))    
+    (do (println "input // pat-match : " input))
+    (do (println "bindings // pat-match : " bindings))
    (cond
      (= bindings fail)  fail
      (variable? pattern) (match-variable pattern input bindings)
@@ -297,7 +300,7 @@
 
 (defn make-expression
   "Turn 1 + 2 into + 1 2"
-  [lhs op rhs] ; method for taking it from a list
+  [lhs op rhs] ; method for taking it from a listy
   (list op lhs rhs))
 
 (defn noise-word-p ; CHECK according to the book
@@ -367,43 +370,40 @@
     ~['(?x is ?y)  '(= ?x ?y)]
   ])
 
-(def ^:dynamic *basic-student-rules* 
-  `[
-    ~['(?x* .)                            '?x]
-    ~['(?x* . ?y*)                   '(?x ?y)]
-    ;~[(list 'if '?x* comma 'then '?y*)  '(?x ?y)]
-    ~['(if ?x* then ?y*)            '(?x ?y)]
-    ;~[(list 'if '?x* comma '?y*)    '(?x ?y)]
-    ;~[(list '?x* comma 'and '?y*)      '(?x ?y)]
-    ~['(find ?x* and ?y*)     '((= to-find-1 ?x) (= to-find-2 ?y))]
-    ~['(find ?x*)             '(= to-find ?x)]
-    ~['(?x* equals ?y*)       '(= ?x ?y)]
-    ~['(?x* same as ?y*)      '(= ?x ?y)]
-    ~['(?x* = ?y*)            '(= ?x ?y)]
-    ~['(?x* is equal to ?y*)  '(= ?x ?y)]
-  
-    ~['(?x* is ?y*)           '(= ?x ?y)]
-    ~['(?x* - ?y*)            '(- ?x ?y)]
-    ~['(?x* minus ?y*)        '(- ?x ?y)]
-    ~['(difference between ?x* and ?y*)  '(- ?y ?x)]
-    ~['(difference ?x* and ?y*)          '(- ?y ?x)]
-    ~['(?x* + ?y*)            '(+ ?x ?y)]
-    ~['(?x* plus ?y*)         '(+ ?x ?y)]
-    ~['(sum ?x* and ?y*)      '(+ ?x ?y)]
-    ~['(product ?x* and ?y*)  '(* ?x ?y)]
-    ~['(?x* * ?y*)            '(* ?x ?y)]
-    ~['(?x* times ?y*)        '(* ?x ?y)]
-    ~['(?x* / ?y*)            '(/ ?x ?y)]
-    ~['(?x* per ?y*)          '(/ ?x ?y)]
-    ~['(?x* divided by ?y*)   '(/ ?x ?y)]
-    ~['(half ?x*)             '(/ ?x 2)]
-    ~['(one half ?x*)         '(/ ?x 2)]
-    ~['(twice ?x*)            '(* 2 ?x)]
-    ~['(square ?x*)           '(* ?x ?x)]
-    ~['(?x* % less than ?y*)  '(* ?y (/ (- 100 ?x) 100))]
-    ~['(?x* % more than ?y*)  '(* ?y (/ (+ 100 ?x) 100))]
-    ~['(?x* % ?y*)            '(* (/ ?x 100) ?y)]
-  ])
+(def ^:dynamic *student-rules*
+  '(((?x* .) ?x)
+     ((?x* . ?y*)  (?x ?y))
+     ((if ?x* \, then ?y*) (?x ?y))
+     ((if ?x* then ?y*) (?x ?y))
+     ((if ?x* \, ?y*) (?x ?y))
+     ((?x* \, and ?y*) (?x ?y))
+     ((find ?x* and ?y*) ((= to-find-1 ?x) (to-find-2 ?y)))
+     ((find ?x*)  (to-find ?x))
+     ((?x* equals ?y*)  (?x ?y))
+     ((?x* same as ?y*)  (?x ?y))
+     ((?x* = ?y*)  (?x ?y))
+     ((?x* is equal to ?y*)  (?x ?y))
+     ((?x* is ?y*) (?x ?y))
+     ((?x* - ?y*) (- ?x ?y))
+     ((?x* minus ?y*) (- ?x ?y))
+     ((difference between ?x* and ?y*) (- ?y ?x))
+     ((difference ?x* and ?y*) (- ?y ?x))
+     ((?x* + ?y*) (+ ?x ?y))
+     ((?x* plus ?y*) (+ ?x ?y))
+     ((sum ?x* and ?y*) (+ ?x ?y))
+     ((product ?x* and ?y*) (* ?x ?y))
+     ((?x* * ?y*) (* ?x ?y))
+     ((?x* times ?y*) (* ?x ?y))
+     ((?x* / ?y*) (/ ?x ?y))
+     ((?x* per ?y*) (/ ?x ?y))
+     ((?x* divided by ?y*) (/ ?x ?y))
+     ((half ?x*) (/ ?x 2))
+     ((one half ?x*) (/ ?x 2))
+     ((twice ?x*) (* 2 ?x))
+     ((square ?x*) (* ?x ?x))
+     ((?x* % less than ?y*) (* ?y (/ (- 100 ?x) 100)))
+     ((?x* % more than ?y*) (* ?y (/ (+ 100 ?x) 100)))
+     ((?x* % ?y*) (* (/ ?x 100) ?y))))
 
 (defn map-expand-to-rules
   "Expand all the rules to allow us to actually match/translate"
@@ -545,15 +545,10 @@
                                     rule-then rest
                                    }}]
   (do (println "// translate-to-expression // current sentence: " sentence ))
-  (or (rule-based-translator sentence *basic-basic-student-rules* 
+  (or (rule-based-translator sentence *student-rules* 
     :action (fn [bindings response]
-                                                                        (do (println "// translate-to-expression lambda // binding: " bindings))
-                                                                        (do (println "// translate-to-expression lambda // response: " response))
             (p-replace  (into {}
                            (map (fn [[var binding-to]]
-                                (do (println "// translate-to-expression lambda lambda // var: " var))
-                                (do (println "// translate-to-expression lambda lambda // binding-to: " binding-to))
-                                (do (println "// translate-to-expression lambda lambda // binding-to: " (list var binding-to)))
                                  [var (translate-to-expression binding-to)]) ; This throws the variable to translate-pair
                                   bindings))
                                     response))) ; THis is returning
