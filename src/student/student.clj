@@ -164,7 +164,6 @@
                (segment-match-* pattern input bindings (+ pos 1))
                b2))))))))
 
-
 (defn segment-match-+
   "Match ?+ -- one or more elements of input."
   [pattern input bindings]
@@ -207,8 +206,8 @@
 (defn segment-pattern?
   "Is this a segment-matching pattern?"
   [pattern]
-  (and (sequential? pattern)
-       (sequential? (first pattern))
+  (and (seq? pattern)
+       (seq? (first pattern))
        (symbol? (first (first pattern)))
        (get segment-matcher-table (first (first pattern)))))
 
@@ -216,7 +215,6 @@
   "Call the right function for this kind of segment pattern."
   [pattern input bindings]
   ((get segment-matcher-table (first (first pattern))) pattern input bindings))
-
 
 (defn pat-match
   ([pattern input] (pat-match pattern input no-bindings))
@@ -261,7 +259,8 @@
   [pat]
   (cond
       (symbol? pat)(get @abbreviation-table pat pat)
-      (empty? pat) pat
+      (not (seq? pat)) pat
+      (not (empty? pat)) pat
           :else (lazy-seq(cons (expand-pat-match-abbrev (first pat))
                       (expand-pat-match-abbrev (rest pat))))))
 
@@ -274,20 +273,17 @@
 (defn rule-based-translator
   "Apply a set of rules"
   [input rules & {:keys [matcher rule-if action rule-then]
-                  :or {
-                       matcher pat-match
+                  :or {matcher pat-match
                        rule-if first
                        rule-then rest
-                       action postwalk-replace
-                      }}]
+                       action postwalk-replace}}]
   (some
       (fn [rule]
-        (do (println "// rule rbt // rule: " (first rule)))
-          (let [result (pat-match (first rule) input)]  
-            (do (println "match: // rbt : " result))
-              (if (not (= result fail))   ; Is 
-                  (replace result (rest rule))))) 
-  rules))
+          (let [result (matcher
+                       (rule-if rule) input)]  
+              (if (not (= result fail))
+                  (action result
+                      (rule-then rule))))) rules))
 
 
 ;; Begin Student
@@ -346,7 +342,7 @@
   We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
   [input-words]
    (do (println "make var for word: " input-words))
-  (first input-words))
+    input-words)
 
 (defn binary-expre-p
     "Is the input expression binary?"
@@ -454,7 +450,7 @@
    see the student work"
     [header equation]
     (printf header)
-    (map #'prefix-to-infix-notation equation))
+    (prefix-to-infix-notation equation))
 
 (defn isolate
 "Isolate the lone x in e on the left hand side of e
@@ -487,6 +483,7 @@
 (defn solve
 "Solve a system of equations by constraint propagation"
 [equations known]
+
 (or
   (some (fn [equation]
     (let [x (one-unknown-var equation)]
@@ -531,11 +528,7 @@
   (do (println "// translate-pair // This is a first pair : " value-pair))
   (cons
         (rest value-pair)
-        (translate-to-expression (rest value-pair))
-        
-        ;(let [pair (translate-to-expression (rest value-pair))
-        ;  (if pair)])
-        ))
+        (translate-to-expression (rest value-pair))))
 
 ; Perhaps broken, but need other things to check
 (defn translate-to-expression ; rule based translator takes input rule & keys rule-if rule-then (first and rest) ;rule response sublis
@@ -547,21 +540,19 @@
                                     rule-then rest
                                    }}]
   (do (println "// translate-to-expression // current sentence: " sentence ))
-  ;(do (println "// translate-to-expression // entering rule-based-translator"))
-  (or (rule-based-translator sentence *student-rules* 
+  (or (rule-based-translator sentence *basic-student-rules* 
     :action (fn [bindings response]
                                                                         (do (println "// translate-to-expression lambda // binding: " bindings))
-                                                                        (do (println "// translate-to-expression lambda // (pre-replace) response: " response))
+                                                                        (do (println "// translate-to-expression lambda // response: " response))
             (p-replace  (into {}
-                          (map (fn [[var binding-to]]
-                                                                        (do (println "// translate-to-expression lambda lambda // var: " var))
-                                                                        (do (println "// translate-to-expression lambda lambda // binding-to: " binding-to))
-                                                                        (do (println "// translate-to-expression lambda lambda // var binding-to: " (list var binding-to)))
+                           (map (fn [[var binding-to]]
+                                (do (println "// translate-to-expression lambda lambda // var: " var))
+                                (do (println "// translate-to-expression lambda lambda // binding-to: " binding-to))
+                                (do (println "// translate-to-expression lambda lambda // binding-to: " (list var binding-to)))
                                  [var (translate-pair (list var binding-to))]) ; This throws the variable to translate-pair
-                            bindings))
-              response))) ; THis is returning
-                                                                        (do (println "// translate-to-expression lambda // (post-replace) response: " response))
-      sentence))
+                                  bindings))
+                                    response))) ; THis is returning
+      (make-var-for-word sentence)))
 
 (defn student
 "Solve certain algebra word problems"
