@@ -216,7 +216,13 @@
   [pattern input bindings]
   ((get segment-matcher-table (first (first pattern))) pattern input bindings))
 
-(defn pat-match
+(defn flatten-shit
+    "Prep the final pattern matcher thing to do the
+     the correct pattern match."
+    [exp]
+    (and (seq? exp) (= (count exp) 2)) (flatten (rest exp)))
+
+(defn pat-match  ; If count is equal to 2 AKA (is (?* ?y)) then next pat-match pattern should be flattened --> ((?* ?y)) now equals (?* ?y)!! 
   ([pattern input] (pat-match pattern input no-bindings))
   ([pattern input bindings]
     (do (println "pattern // pat-match : " pattern))    
@@ -228,6 +234,9 @@
      (= pattern input) bindings
      (single-pattern? pattern) (single-matcher pattern input bindings)
      (segment-pattern? pattern) (segment-matcher pattern input bindings)
+     (and (seq? pattern) (seq? input) (= (count pattern) 2))
+     (pat-match (flatten (rest pattern)) (rest input)
+        (pat-match (first pattern) (first input) bindings))
      (and (seq? pattern) (seq? input))
           (pat-match (rest pattern) (rest input)
               (pat-match (first pattern) (first input) bindings))
