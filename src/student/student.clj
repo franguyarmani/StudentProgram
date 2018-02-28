@@ -6,6 +6,8 @@
 
 ;; Begin Pattern Matching
 ;; ================================================================================
+(declare unknown-parameter)
+
 (def comma
   (symbol ","))
 
@@ -17,8 +19,7 @@
    (let [idx (.indexOf (nthrest seq start) item)]
      (if (>= idx 0)
        (+ start idx)
-       -1)))
-  ([seq item] (.indexOf seq item)))
+       -1))))
 
 
 (def fail
@@ -59,7 +60,9 @@
 
 (defn variable?
   [x]
-  (and (symbol? x) (= \? (get (str x) 0))))
+  (or (and 
+    (unknown-parameter x) (= \? (get (str x) 0)))
+  )
 
 (defn get-binding
   "Find a variable->value binding in the given binding."
@@ -132,7 +135,7 @@
    at position start. If pat1 is non-constant, then just return start,
    conservatively assuming it could match."
   [pat1 input start]
-  (cond (and (not (list? pat1))
+  (cond (and (not (seq? pat1))
              (not (variable? pat1)))
     (let [idx (index-in-seq input pat1 start)]
         (if (< idx 0)
@@ -264,7 +267,7 @@
 (def abbreviation-table
   (atom {}))
 
-(declare unknown-parameter)
+
 
 (defn expand-pat-match-abbrev
   "Expand all pattern matching abbreviations in pat"
@@ -332,7 +335,7 @@
       (return-inverse-operation operation (rest inverse-poss) ) (second (first inverse-poss)))))
 
 (defn unknown-parameter ;
-  "Is the argument an unknown variable?"
+  "Is the argument an unknown variable? (implements symbolp)"
   [expre]
   (cond
     (= expre nil) true
@@ -379,40 +382,43 @@
     ~['(?x is ?y)  '(= ?x ?y)]
   ])
 
-(def ^:dynamic *student-rules*
-  '(((?x* .) ?x)
-     ((?x* . ?y*)  (?x ?y))
-     ((if ?x* \, then ?y*) (?x ?y))
-     ((if ?x* then ?y*) (?x ?y))
-     ((if ?x* \, ?y*) (?x ?y))
-     ((?x* \, and ?y*) (?x ?y))
-     ((find ?x* and ?y*) ((= to-find-1 ?x) (to-find-2 ?y)))
-     ((find ?x*)  (to-find ?x))
-     ((?x* equals ?y*)  (?x ?y))
-     ((?x* same as ?y*)  (?x ?y))
-     ((?x* = ?y*)  (?x ?y))
-     ((?x* is equal to ?y*)  (?x ?y))
-     ((?x* is ?y*) (?x ?y))
-     ((?x* - ?y*) (- ?x ?y))
-     ((?x* minus ?y*) (- ?x ?y))
-     ((difference between ?x* and ?y*) (- ?y ?x))
-     ((difference ?x* and ?y*) (- ?y ?x))
-     ((?x* + ?y*) (+ ?x ?y))
-     ((?x* plus ?y*) (+ ?x ?y))
-     ((sum ?x* and ?y*) (+ ?x ?y))
-     ((product ?x* and ?y*) (* ?x ?y))
-     ((?x* * ?y*) (* ?x ?y))
-     ((?x* times ?y*) (* ?x ?y))
-     ((?x* / ?y*) (/ ?x ?y))
-     ((?x* per ?y*) (/ ?x ?y))
-     ((?x* divided by ?y*) (/ ?x ?y))
-     ((half ?x*) (/ ?x 2))
-     ((one half ?x*) (/ ?x 2))
-     ((twice ?x*) (* 2 ?x))
-     ((square ?x*) (* ?x ?x))
-     ((?x* % less than ?y*) (* ?y (/ (- 100 ?x) 100)))
-     ((?x* % more than ?y*) (* ?y (/ (+ 100 ?x) 100)))
-     ((?x* % ?y*) (* (/ ?x 100) ?y))))
+  (def ^:dynamic *basic-student-rules* 
+    `[
+      ~['(?x* .)                            '?x]
+      ~['(?x* . ?y*)                   '(?x ?y)]
+      ;~[(list 'if '?x* comma 'then '?y*)  '(?x ?y)]
+      ~['(if ?x* then ?y*)            '(?x ?y)]
+      ;~[(list 'if '?x* comma '?y*)    '(?x ?y)]
+      ;~[(list '?x* comma 'and '?y*)      '(?x ?y)]
+      ~['(find ?x* and ?y*)     '((= to-find-1 ?x) (= to-find-2 ?y))]
+      ~['(find ?x*)             '(= to-find ?x)]
+      ~['(?x* equals ?y*)       '(= ?x ?y)]
+      ~['(?x* same as ?y*)      '(= ?x ?y)]
+      ~['(?x* = ?y*)            '(= ?x ?y)]
+      ~['(?x* is equal to ?y*)  '(= ?x ?y)]
+    
+      ~['(?x* is ?y*)           '(= ?x ?y)]
+      ~['(?x* - ?y*)            '(- ?x ?y)]
+      ~['(?x* minus ?y*)        '(- ?x ?y)]
+      ~['(difference between ?x* and ?y*)  '(- ?y ?x)]
+      ~['(difference ?x* and ?y*)          '(- ?y ?x)]
+      ~['(?x* + ?y*)            '(+ ?x ?y)]
+      ~['(?x* plus ?y*)         '(+ ?x ?y)]
+      ~['(sum ?x* and ?y*)      '(+ ?x ?y)]
+      ~['(product ?x* and ?y*)  '(* ?x ?y)]
+      ~['(?x* * ?y*)            '(* ?x ?y)]
+      ~['(?x* times ?y*)        '(* ?x ?y)]
+      ~['(?x* / ?y*)            '(/ ?x ?y)]
+      ~['(?x* per ?y*)          '(/ ?x ?y)]
+      ~['(?x* divided by ?y*)   '(/ ?x ?y)]
+      ~['(half ?x*)             '(/ ?x 2)]
+      ~['(one half ?x*)         '(/ ?x 2)]
+      ~['(twice ?x*)            '(* 2 ?x)]
+      ~['(square ?x*)           '(* ?x ?x)]
+      ~['(?x* % less than ?y*)  '(* ?y (/ (- 100 ?x) 100))]
+      ~['(?x* % more than ?y*)  '(* ?y (/ (+ 100 ?x) 100))]
+      ~['(?x* % ?y*)            '(* (/ ?x 100) ?y)]
+    ])
 
 (defn map-expand-to-rules
   "Expand all the rules to allow us to actually match/translate"
