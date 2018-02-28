@@ -62,7 +62,7 @@
   [x]
   (or (and 
     (unknown-parameter x) (= \? (get (str x) 0)))
-  )
+  ))
 
 (defn get-binding
   "Find a variable->value binding in the given binding."
@@ -151,8 +151,8 @@
   ([pattern input bindings] (segment-match-* pattern input bindings 0))
   ([pattern input bindings start]
    (let [v (second (first pattern))
-         pat (rest pattern)]
-     (if (nil? pat)
+         pat (next pattern)]
+     (if (nil? pat) ;<<<<<< at the end of a sentence pat is emply list
        (match-variable v input bindings)
        (let [pos (first-match-pos (first pat) input start)]
          (if (nil? pos)
@@ -199,6 +199,7 @@
 (defn single-pattern?
   "Is this a single-matching pattern?"
   [pattern]
+  ;(println "in single-pattern?")
   (and (seq? pattern) (get single-matcher-table (first pattern))))
 
 (defn single-matcher
@@ -228,9 +229,9 @@
 (defn pat-match  ; If count is equal to 2 AKA (is (?* ?y)) then next pat-match pattern should be flattened --> ((?* ?y)) now equals (?* ?y)!! 
   ([pattern input] (pat-match pattern input no-bindings))
   ([pattern input bindings]
-    (do (println "pattern // pat-match : " pattern))    
-    (do (println "input // pat-match : " input))
-    (do (println "bindings // pat-match : " bindings))
+    ;(do (println "pattern // pat-match : " pattern))    
+    ;(do (println "input // pat-match : " input))
+    ;(do (println "bindings // pat-match : " bindings))
    (cond
      (= bindings fail)  fail
      (variable? pattern) (match-variable pattern input bindings)
@@ -293,8 +294,7 @@
                        action postwalk-replace}}]
   (some
       (fn [rule]
-          (let [result (matcher
-                       (rule-if rule) input)]  
+          (let [result (matcher (rule-if rule) input)]  
               (if (not (= result fail))
                   (action result
                       (rule-then rule))))) rules))
@@ -356,7 +356,9 @@
   We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
   [input-words]
    (do (println "make var for word: " input-words))
-   (first (list  input-words)))
+   (if (seq? input-words)
+      (first (input-words))
+      input-words))
 
 (defn binary-expre-p
     "Is the input expression binary?"
