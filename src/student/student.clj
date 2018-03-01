@@ -356,9 +356,7 @@
   We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
   [input-words]
    (do (println "make var for word: " input-words))
-   (if (seq? input-words)
-      (first (input-words))
-      input-words))
+   (first input-words))
 
 (defn binary-expre-p
     "Is the input expression binary?"
@@ -388,17 +386,17 @@
     `[
       ~['(?x* .)                            '?x]
       ~['(?x* . ?y*)                   '(?x ?y)]
-      ;~[(list 'if '?x* comma 'then '?y*)  '(?x ?y)]
-      ~['(if ?x* then ?y*)            '(?x ?y)]
-      ;~[(list 'if '?x* comma '?y*)    '(?x ?y)]
-      ;~[(list '?x* comma 'and '?y*)      '(?x ?y)]
+      ;~['(if ?x* \, then ?y*)          '(?x ?y)] ;comma
+      ~['(if ?x* then ?y*)             '(?x ?y)]
+      ;~[(list 'if '?x* (str \,) '?y*)     '(?x ?y)] ;comma
+      ;~[(list '?x* comma 'and '?y*)    '(?x ?y)]   ;comma
+      ~['(if ?x* and ?y*)              '(?x ?y)]
       ~['(find ?x* and ?y*)     '((= to-find-1 ?x) (= to-find-2 ?y))]
       ~['(find ?x*)             '(= to-find ?x)]
       ~['(?x* equals ?y*)       '(= ?x ?y)]
       ~['(?x* same as ?y*)      '(= ?x ?y)]
       ~['(?x* = ?y*)            '(= ?x ?y)]
       ~['(?x* is equal to ?y*)  '(= ?x ?y)]
-    
       ~['(?x* is ?y*)           '(= ?x ?y)]
       ~['(?x* - ?y*)            '(- ?x ?y)]
       ~['(?x* minus ?y*)        '(- ?x ?y)]
@@ -511,6 +509,7 @@
     (let [x (one-unknown-var equation)]
             (do (println "system of equations: " equations))
             (do (println "this is the equation: " equation))
+            (do (println "This is x: " x))
             (when x
               ;(do (println x))
               (let [answer  (solve-arithmetic
