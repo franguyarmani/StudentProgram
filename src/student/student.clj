@@ -8,8 +8,6 @@
 ;; ================================================================================
 (declare unknown-parameter)
 
-(def comma
-  (symbol ","))
 
 (defn index-in-seq
   "Finds the index of item in the given sequence; the optional start parameter
@@ -383,15 +381,17 @@
     ~['(?x is ?y)  '(= ?x ?y)]
   ])
 
+
+; Utilize the word comma as our actual comma during the input phase of things
   (def ^:dynamic *basic-student-rules* 
     `[
       ~['(?x* .)                            '?x]
       ~['(?x* . ?y*)                   '(?x ?y)]
-      ;~['(if ?x* \, then ?y*)          '(?x ?y)] ;comma
+      ~['(if ?x* comma then ?y*)          '(?x ?y)] ;comma
       ~['(if ?x* then ?y*)             '(?x ?y)]
-      ;~[(list 'if '?x* (str \,) '?y*)     '(?x ?y)] ;comma
-      ;~[(list '?x* comma 'and '?y*)    '(?x ?y)]   ;comma
-      ;~['(?x* and ?y*)    '(?x ?y)]
+      ~['(if ?x* comma ?y*)     '(?x ?y)] ;comma
+      ~['(?x* comma and ?y*)    '(?x ?y)]   ;comma
+      ~['(?x* and ?y*)    '(?x ?y)]
       ~['(if ?x* and ?y*)              '(?x ?y)]
       ~['(find ?x* and ?y*)     '((= to-find-1 ?x) (= to-find-2 ?y))]
       ~['(find ?x*)             '(= to-find ?x)]
