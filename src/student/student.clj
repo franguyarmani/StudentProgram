@@ -42,7 +42,6 @@
 
 (defmulti get-rhs class)
 (defmethod get-rhs clojure.lang.PersistentList [expre]
-  (println expre)
   (if (> (count expre) 3)
     fail
     (nth expre 2)))
@@ -319,7 +318,7 @@
 (defn noise-word-p ; CHECK according to the book
 "A word we don't really care about"
 [word]
-('#{a an the this number of $} word))
+('#{a an An the The this This number of $} word))
 
 
 (def operators-and-their-inverses
@@ -385,41 +384,44 @@
 
   (def ^:dynamic *basic-student-rules* 
     `[
-      ~['(?x* .)                            '?x]
-      ~['(?x* . ?y*)                   '(?x ?y)]
-      ;~['(if ?x* \, then ?y*)          '(?x ?y)] ;comma
-      ~['(if ?x* then ?y*)             '(?x ?y)]
-      ;~[(list 'if '?x* (str \,) '?y*)     '(?x ?y)] ;comma
-      ;~[(list '?x* comma 'and '?y*)    '(?x ?y)]   ;comma
-      ;~['(?x* and ?y*)    '(?x ?y)]
-      ~['(if ?x* and ?y*)              '(?x ?y)]
-      ~['(find ?x* and ?y*)     '((= to-find-1 ?x) (= to-find-2 ?y))]
-      ~['(find ?x*)             '(= to-find ?x)]
-      ~['(?x* equals ?y*)       '(= ?x ?y)]
-      ~['(?x* same as ?y*)      '(= ?x ?y)]
-      ~['(?x* = ?y*)            '(= ?x ?y)]
-      ~['(?x* is equal to ?y*)  '(= ?x ?y)]
-      ~['(?x* is ?y*)           '(= ?x ?y)]
-      ~['(?x* - ?y*)            '(- ?x ?y)]
-      ~['(?x* minus ?y*)        '(- ?x ?y)]
-      ~['(difference between ?x* and ?y*)  '(- ?y ?x)]
-      ~['(difference ?x* and ?y*)          '(- ?y ?x)]
-      ~['(?x* + ?y*)            '(+ ?x ?y)]
-      ~['(?x* plus ?y*)         '(+ ?x ?y)]
-      ~['(sum ?x* and ?y*)      '(+ ?x ?y)]
-      ~['(product ?x* and ?y*)  '(* ?x ?y)]
-      ~['(?x* * ?y*)            '(* ?x ?y)]
-      ~['(?x* times ?y*)        '(* ?x ?y)]
-      ~['(?x* / ?y*)            '(/ ?x ?y)]
-      ~['(?x* per ?y*)          '(/ ?x ?y)]
-      ~['(?x* divided by ?y*)   '(/ ?x ?y)]
-      ~['(half ?x*)             '(/ ?x 2)]
-      ~['(one half ?x*)         '(/ ?x 2)]
-      ~['(twice ?x*)            '(* 2 ?x)]
-      ~['(square ?x*)           '(* ?x ?x)]
+      ~['(?x* .)                                     '?x]
+      ~['(?x* . ?y*)                            '(?x ?y)]
+      ~['(if ?x* comma then ?y*)                '(?x ?y)] ;comma
+      ~['(If ?x* comma then ?y*)                '(?x ?y)] ;comma
+      ~['(if ?x* then ?y*)                      '(?x ?y)]
+      ~['(If ?x* then ?y*)                      '(?x ?y)]
+      ~['(if ?x* comma ?y*)                     '(?x ?y)] ;comma
+      ~['(If ?x* comma ?y*)                     '(?x ?y)] ;comma
+      ~['(?x* comma and ?y*)                    '(?x ?y)]   ;comma
+      ~['(?x* and ?y*)                          '(?x ?y)]
+      ~['(if ?x* and ?y*)                       '(?x ?y)]
+      ~['(find ?x* and ?y*)       '((= to-find-1 ?x) (= to-find-2 ?y))]
+      ~['(find ?x*)                      '(= to-find ?x)]
+      ~['(?x* equals ?y*)                     '(= ?x ?y)]
+      ~['(?x* same as ?y*)                    '(= ?x ?y)]
+      ~['(?x* = ?y*)                          '(= ?x ?y)]
+      ~['(?x* is equal to ?y*)                '(= ?x ?y)]
+      ~['(?x* is ?y*)                         '(= ?x ?y)]
+      ~['(?x* - ?y*)                          '(- ?x ?y)]
+      ~['(?x* minus ?y*)                      '(- ?x ?y)]
+      ~['(difference between ?x* and ?y*)     '(- ?y ?x)]
+      ~['(difference ?x* and ?y*)             '(- ?y ?x)]
+      ~['(?x* + ?y*)                          '(+ ?x ?y)]
+      ~['(?x* plus ?y*)                       '(+ ?x ?y)]
+      ~['(sum ?x* and ?y*)                    '(+ ?x ?y)]
+      ~['(product ?x* and ?y*)                '(* ?x ?y)]
+      ~['(?x* * ?y*)                          '(* ?x ?y)]
+      ~['(?x* times ?y*)                      '(* ?x ?y)]
+      ~['(?x* / ?y*)                          '(/ ?x ?y)]
+      ~['(?x* per ?y*)                        '(/ ?x ?y)]
+      ~['(?x* divided by ?y*)                 '(/ ?x ?y)]
+      ~['(half ?x*)                            '(/ ?x 2)]
+      ~['(one half ?x*)                        '(/ ?x 2)]
+      ~['(twice ?x*)                           '(* 2 ?x)]
+      ~['(square ?x*)                         '(* ?x ?x)]
       ~['(?x* % less than ?y*)  '(* ?y (/ (- 100 ?x) 100))]
       ~['(?x* % more than ?y*)  '(* ?y (/ (+ 100 ?x) 100))]
-      ~['(?x* % ?y*)            '(* (/ ?x 100) ?y)]
+      ~['(?x* % ?y*)                  '(* (/ ?x 100) ?y)]
     ])
 
 (defn map-expand-to-rules
@@ -444,7 +446,6 @@
 (defn no-unknown-var
 "Returns true if all variables in expression are now known"
   [expre]
-  (println "unknown expre : " expre)
   (cond (unknown-parameter expre) nil
     (not (seq? expre)) true
     (no-unknown-var (get-lhs expre)) (no-unknown-var (get-rhs expre))
@@ -453,6 +454,7 @@
 (defn one-unknown-var
 "Returns the single unkown expression if only one exists"
   [expre]
+  (print)
   (cond
     (symbol? expre) expre ; CHECK
     (not (expre? expre)) fail ; CHECK
@@ -479,8 +481,8 @@
  Requires many other functions --> probably one of the
  last functions we will finish."
  [e x]
-  (do (println "x: " x))
-  (do (println "e: " e))
+  (do (println "this the unknown in the following expression: " x))
+  (do (println "expression: " e))
   (cond
     ; First case
     (= (get-lhs e) x) e
@@ -509,15 +511,17 @@
 (or
   (some (fn [equation]
     (let [x (one-unknown-var equation)]
-            (do (println "system of equations: " equations))
-            (do (println "this is the equation: " equation))
-            (do (println "solve || This is x: " x))
+            
+          ;  (do (println "solve || This is x: " x))
             (when x
               ;(do (println x))
               (let [answer  (solve-arithmetic
                             (isolate equation x)) ; should look like: y = 5
                     action postwalk-replace]
+              (do (println "system of equations: " equations))
+              (do (println "this is the equation with one known: " equation))
               (do (println "this is the answer: " answer))
+              (do (println "\n"))
               (solve (action {(first answer) (get-rhs answer)}
                                         ; idk if the line below this is right, we'll see.
                                         (remove (partial = equation) equations))
@@ -528,7 +532,7 @@
 (defn solve-equations
 "Print the equations and their solution"
 [equations]
-  (do (println equations))
+  ;(do (println equations))
   (print-equation "The equations I am currently solving are: " equations)
   (print-equation "The solution is: " (solve equations nil)))
 
@@ -579,6 +583,12 @@
     (create-list-of-equations
       (translate-to-expression
         (remove noise-word-p words)))))
+
+
+;=========Test Cases=========
+; '(The daily cost of living for a group is the overhead cost plus the running cost for each person times the number of people in the group . This cost for one group equals $ 100 comma and the number of people in the group is 40 . If the overhead cost is 10 times the running cost comma find the overhead and running cost for each person .)
+; '(If the number of customers Tom gets is twice the square of 20% of the number of advertisements he runs comma and the number of advertisements is 45 , then what is the number of customers Tom gets ?)
+; '(Fran's age divided by Robin's height is one half Kelly's IQ . Kelly's IQ minus 80 is Robin's height . If Robin is 4 feet tall comma how old is Fran ?)
 
 (defn -main
   "I don't do a whole lot ... yet."
