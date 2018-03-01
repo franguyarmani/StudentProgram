@@ -503,7 +503,6 @@
                                                           x)))
 
 
-; Broken at line 515 index out of bounds
 (defn solve
 "Solve a system of equations by constraint propagation"
 [equations known]
