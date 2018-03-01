@@ -42,6 +42,7 @@
 
 (defmulti get-rhs class)
 (defmethod get-rhs clojure.lang.PersistentList [expre]
+  (println expre)
   (if (> (count expre) 3)
     fail
     (nth expre 2)))
@@ -290,14 +291,14 @@
   [input rules & {:keys [matcher rule-if action rule-then]
                   :or {matcher pat-match
                        rule-if first
-                       rule-then rest
+                       rule-then next
                        action postwalk-replace}}]
-  (some
+  (first (some
       (fn [rule]
           (let [result (matcher (rule-if rule) input)]  
               (if (not (= result fail))
                   (action result
-                      (rule-then rule))))) rules))
+                      (rule-then rule))))) rules)))
 
 
 ;; Begin Student
@@ -390,6 +391,7 @@
       ~['(if ?x* then ?y*)             '(?x ?y)]
       ;~[(list 'if '?x* (str \,) '?y*)     '(?x ?y)] ;comma
       ;~[(list '?x* comma 'and '?y*)    '(?x ?y)]   ;comma
+      ;~['(?x* and ?y*)    '(?x ?y)]
       ~['(if ?x* and ?y*)              '(?x ?y)]
       ~['(find ?x* and ?y*)     '((= to-find-1 ?x) (= to-find-2 ?y))]
       ~['(find ?x*)             '(= to-find ?x)]
@@ -509,7 +511,7 @@
     (let [x (one-unknown-var equation)]
             (do (println "system of equations: " equations))
             (do (println "this is the equation: " equation))
-            (do (println "This is x: " x))
+            (do (println "solve || This is x: " x))
             (when x
               ;(do (println x))
               (let [answer  (solve-arithmetic
@@ -544,7 +546,7 @@
 
 (declare translate-to-expression)
 
-(defn translate-pair
+(defn translate-pair ;depricated
   [value-pair]
   (do (println "// translate-pair // This is a first pair : " value-pair))
   (cons
