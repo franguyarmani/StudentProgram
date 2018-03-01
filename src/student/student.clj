@@ -197,7 +197,6 @@
 (defn single-pattern?
   "Is this a single-matching pattern?"
   [pattern]
-  ;(println "in single-pattern?")
   (and (seq? pattern) (get single-matcher-table (first pattern))))
 
 (defn single-matcher
@@ -227,9 +226,6 @@
 (defn pat-match  ; If count is equal to 2 AKA (is (?* ?y)) then next pat-match pattern should be flattened --> ((?* ?y)) now equals (?* ?y)!! 
   ([pattern input] (pat-match pattern input no-bindings))
   ([pattern input bindings]
-    ;(do (println "pattern // pat-match : " pattern))    
-    ;(do (println "input // pat-match : " input))
-    ;(do (println "bindings // pat-match : " bindings))
    (cond
      (= bindings fail)  fail
      (variable? pattern) (match-variable pattern input bindings)
@@ -353,7 +349,6 @@
   Word = days = 2
   We assume these words will be at the beginning of a pattern match sequence based on lhs rhs etc"
   [input-words]
-   (do (println "make var for word: " input-words))
    (first input-words))
 
 (defn binary-expre-p
@@ -454,7 +449,6 @@
 (defn one-unknown-var
 "Returns the single unkown expression if only one exists"
   [expre]
-  (print)
   (cond
     (symbol? expre) expre ; CHECK
     (not (expre? expre)) fail ; CHECK
@@ -481,8 +475,6 @@
  Requires many other functions --> probably one of the
  last functions we will finish."
  [e x]
-  (do (println "this the unknown in the following expression: " x))
-  (do (println "expression: " e))
   (cond
     ; First case
     (= (get-lhs e) x) e
@@ -511,16 +503,12 @@
   (some (fn [equation]
     (let [x (one-unknown-var equation)]
             
-          ;  (do (println "solve || This is x: " x))
+ 
             (when x
-              ;(do (println x))
+
               (let [answer  (solve-arithmetic
                             (isolate equation x)) ; should look like: y = 5
                     action postwalk-replace]
-              (do (println "system of equations: " equations))
-              (do (println "this is the equation with one known: " equation))
-              (do (println "this is the answer: " answer))
-              (do (println "\n"))
               (solve (action {(first answer) (get-rhs answer)}
                                         ; idk if the line below this is right, we'll see.
                                         (remove (partial = equation) equations))
@@ -538,7 +526,6 @@
 (defn create-list-of-equations
 "Separate the equations into nested parenthesis"
 [expre]
-(do (println "// create-list-of-equations // expre: " expre )) ;((= (+ 3 4) (* (- (+ 2 x)) 7)) (= (+ (* 3 x ) y) 12 ))
   (cond
     (empty? expre) fail
     (not (sequential? (first expre))) (list expre)
@@ -551,7 +538,6 @@
 
 (defn translate-pair ;depricated
   [value-pair]
-  (do (println "// translate-pair // This is a first pair : " value-pair))
   (cons
         (rest value-pair)
         (translate-to-expression (rest value-pair))))
@@ -565,7 +551,6 @@
                                     rule-if first
                                     rule-then rest
                                    }}]
-  (do (println "// translate-to-expression // current sentence: " sentence ))
   (or (rule-based-translator sentence *student-rules* 
     :action (fn [bindings response]
             (p-replace  (into {}
