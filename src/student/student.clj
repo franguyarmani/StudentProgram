@@ -467,8 +467,9 @@
   "Format and print the equation so we can
    see the student work"
     [header equation]
-    (printf header)
-    (map #'prefix-to-infix-notation equation))
+    (do (printf header))
+    ;(println "PRINT-EQUATIONS: " equation)
+    (do (map (println (map prefix-to-infix-notation equation)))))
 
 (defn isolate
 "Isolate the lone x in e on the left hand side of e
@@ -521,7 +522,8 @@
 [equations]
   ;(do (println equations))
   (print-equation "The equations I am currently solving are: " equations)
-  (print-equation "The solution is: " (solve equations nil)))
+  (printf "The solution is: ") 
+  (solve equations nil))
 
 (defn create-list-of-equations
 "Separate the equations into nested parenthesis"
