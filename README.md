@@ -1,32 +1,17 @@
-# student
+# Student Clojure Project
+### By: Nora Baryoun, Erik Whipp, & Francis Peabody
+### A. Knapp || Programming Languages
 
-FIXME: description
+Implementing Norvig's student program - an application able to complete 6th grade math problems.
+A lot of this prject involved translating Norvig's program (written in LISP) to Clojure.
 
-## Installation
+## PatMatch
+This is the pattern recognition and matcher portion of the project.
 
-Download from http://example.com/FIXME.
-
-## Usage
-
-FIXME: explanation
-
-    $ java -jar student-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
+## Student
+This is the portion of the project that solves the equation and outputs an answer.
 
 ### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
 
 ## License
 
